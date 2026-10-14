@@ -1,0 +1,1915 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Pawsome Clash ?秘憭找?擛? a cute-pet turn-based battle game. Break guards, chain element combos, and befriend wild pets.">
+<meta name="theme-color" content="#2a1f4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pawsome Clash">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pawsome Clash ?秘憭找?擛?>
+<meta property="og:description" content="Cute pets. Turn-based battles. Big hearts. Play free in your browser.">
+<meta property="og:image" content="thumbnail.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="thumbnail.png">
+<style>
+html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-text-size-adjust:100%}
+body{font-size:14px}
+img{max-width:100%}
+</style>
+<title>Pawsome Clash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Lilita+One&display=swap">
+<style>
+/* Layout: one phone-shaped stage centered on the page; every screen stacks inside it.
+   Look: sticker-toy — chunky ink outlines, offset "pressable" shadows, candy colors. One committed light world. */
+:root{
+  --ink:#2a1f4a;
+  --paper:#fffaf2;
+  --berry:#ff4f8b;
+  --sun:#ffc531;
+  --mint:#3ccf9a;
+  --sky:#8fd3ff;
+  --grape:#7a5cff;
+  --muted:#6f6690;
+  --danger:#ff5a5f;
+  --shield:#8fe3ff;
+  --frame:#1d1536;
+  --font-display:'Lilita One','Baloo 2','Microsoft JhengHei','PingFang TC',system-ui,sans-serif;
+  --font-ui:'Baloo 2','PingFang TC','Microsoft JhengHei',system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;background:var(--frame);background-image:radial-gradient(rgba(255,255,255,.06) 1.5px,transparent 1.5px);background-size:22px 22px;color:var(--ink);font-family:var(--font-ui);overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+button{font-family:inherit;color:inherit}
+#game{position:relative;height:100%;max-width:480px;margin:0 auto;overflow:hidden;background:var(--sky);box-shadow:0 0 0 3px var(--ink),0 20px 60px rgba(0,0,0,.5)}
+
+/* ---------- background ---------- */
+#bg{position:absolute;inset:0;transition:background .6s}
+#bg .deco{position:absolute;opacity:.75;animation:floaty var(--d,8s) ease-in-out infinite alternate;pointer-events:none}
+@keyframes floaty{from{transform:translate(0,0) rotate(-6deg)}to{transform:translate(18px,-14px) rotate(6deg)}}
+
+/* ---------- screens ---------- */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:scale(1.03);transition:opacity .35s,transform .35s,visibility 0s .35s;z-index:2}
+.screen.active{opacity:1;visibility:visible;transform:none;transition:opacity .35s,transform .35s}
+
+/* ---------- buttons ---------- */
+.btn{font-family:var(--font-display);font-size:21px;letter-spacing:.02em;background:var(--sun);border:3px solid var(--ink);border-radius:18px;padding:11px 22px;box-shadow:0 5px 0 var(--ink);cursor:pointer;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.btn.pink{background:var(--berry);color:#fff;text-shadow:0 2px 0 var(--ink)}
+.btn.blue{background:#7cc8ff}
+.btn.mint{background:var(--mint)}
+.btn.ghost{background:#fff}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.icon-btn{width:42px;height:42px;border-radius:14px;border:3px solid var(--ink);background:#fff;box-shadow:0 3px 0 var(--ink);font-size:18px;font-weight:800;cursor:pointer;display:grid;place-items:center;flex:none}
+.icon-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+button:focus-visible,.unit:focus-visible{outline:3px solid var(--berry);outline-offset:3px}
+.linkbtn{background:none;border:0;font-weight:700;color:rgba(42,31,74,.6);text-decoration:underline;cursor:pointer;font-size:13px}
+
+/* ---------- title ---------- */
+#title{align-items:center;padding:16px;gap:10px}
+#title .t-top{align-self:stretch;display:flex;justify-content:flex-end}
+.logo{text-align:center;margin-top:2vh}
+.logo-sub{display:inline-block;font-family:var(--font-display);font-size:20px;letter-spacing:.3em;background:var(--ink);color:var(--sun);padding:3px 12px 3px 16px;border-radius:999px;transform:rotate(-3deg)}
+.logo h1{font-family:var(--font-display);font-weight:400;font-size:clamp(54px,17vw,80px);line-height:.86;margin:10px 0 6px;color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);letter-spacing:.01em}
+.logo h1 span{color:var(--sun)}
+.logo-tag{font-weight:800;font-size:15px}
+.parade{display:flex;gap:6px;font-size:clamp(40px,12vw,54px);margin:2vh 0 1vh}
+.parade span{display:inline-block;animation:hop 1.2s ease-in-out infinite;filter:drop-shadow(0 4px 0 rgba(42,31,74,.25))}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px) rotate(-6deg)}60%{transform:translateY(-16px) rotate(6deg)}}
+.menu{display:flex;flex-direction:column;gap:14px;width:min(100%,300px)}
+.menu .btn{width:100%}
+.progress{margin-top:auto;font-weight:800;background:rgba(255,255,255,.75);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font-variant-numeric:tabular-nums}
+
+/* ---------- headers ---------- */
+.bar{display:flex;align-items:center;gap:10px;padding:12px 16px}
+.bar h2{font-family:var(--font-display);font-weight:400;font-size:26px;margin:0;flex:1;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ink)}
+.chip{background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:3px 12px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* ---------- map ---------- */
+#map-path{position:relative;flex:1;margin:0 16px 16px}
+#map-path svg{position:absolute;inset:0;width:100%;height:100%}
+.node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;cursor:pointer;padding:0}
+.node .disc{width:76px;height:76px;border-radius:50%;background:#fff;border:3.5px solid var(--ink);box-shadow:0 5px 0 var(--ink);display:grid;place-items:center;font-size:38px;position:relative}
+.node .lbl{font-family:var(--font-display);font-size:15px;background:var(--paper);border:2.5px solid var(--ink);border-radius:10px;padding:1px 9px;white-space:nowrap}
+.node .stars{font-size:15px;letter-spacing:1px;color:var(--sun);-webkit-text-stroke:1px var(--ink);height:18px}
+.node.locked .disc{background:#d8d2e8;filter:grayscale(1)}
+.node.locked .disc::after{content:'🔒';position:absolute;font-size:24px;right:-6px;bottom:-6px;filter:none}
+.node.next .disc{animation:pulse 1.2s ease-in-out infinite;background:var(--sun)}
+.node.next .disc::before{content:'PLAY';position:absolute;top:-18px;font-family:var(--font-display);font-size:13px;background:var(--berry);color:#fff;border:2px solid var(--ink);border-radius:8px;padding:0 6px}
+@keyframes pulse{50%{transform:scale(1.08)}}
+
+/* ---------- sheets / overlays ---------- */
+.sheet-wrap{position:absolute;inset:0;z-index:20;background:rgba(29,21,54,.55);display:flex;align-items:flex-end}
+.sheet{background:var(--paper);border-top:3px solid var(--ink);border-radius:26px 26px 0 0;width:100%;max-height:92%;overflow:auto;padding:16px 16px 20px;box-sizing:border-box;animation:sheetUp .3s ease-out}
+@keyframes sheetUp{from{transform:translateY(100%)}}
+.sheet-head{display:flex;align-items:flex-start;gap:10px}
+.sheet-head h3{font-family:var(--font-display);font-weight:400;font-size:28px;margin:0;line-height:1.05}
+.eyebrow{font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.foes{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px}
+.foe{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 10px 2px 4px;font-weight:800;font-size:14px}
+.foe b{font-size:24px;font-weight:400}
+.tip{margin:6px 0 12px;background:#fff3c4;border:2px dashed var(--ink);border-radius:12px;padding:8px 10px;font-weight:700;font-size:14px;line-height:1.35}
+.tm-label{display:flex;justify-content:space-between;font-family:var(--font-display);font-size:18px;margin-bottom:8px}
+.tm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.pcard{position:relative;text-align:left;background:#fff;border:3px solid var(--ink);border-radius:16px;padding:8px 10px;box-shadow:0 4px 0 var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pcard .pe{font-size:40px;line-height:1.1}
+.pcard .pn{font-family:var(--font-display);font-size:17px}
+.pcard .pr{font-size:12px;font-weight:700;color:var(--muted)}
+.pcard .ps{font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.pcard.sel{background:#e6fff4;box-shadow:0 4px 0 var(--ink),inset 0 0 0 3px var(--mint)}
+.pcard.sel::after{content:'✓';position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--mint);border:2px solid var(--ink);display:grid;place-items:center;font-weight:800}
+.pcard.lock{background:#ece8f4;cursor:not-allowed}
+.pcard.lock .pe{filter:brightness(0) opacity(.3)}
+.type-pill{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:#fff;border:2px solid var(--ink);border-radius:999px;padding:0 7px;text-shadow:0 1px 0 rgba(0,0,0,.35);width:max-content}
+#btn-fight{width:100%}
+
+/* ---------- battle ---------- */
+.bbar{display:flex;align-items:center;gap:8px;padding:10px 12px 4px;position:relative;z-index:3}
+.bbar .icon-btn{width:38px;height:38px;font-size:15px}
+.round{font-family:var(--font-display);font-size:15px;background:var(--ink);color:#fff;border-radius:10px;padding:2px 8px;flex:none}
+#queue{flex:1;display:flex;align-items:center;gap:4px;overflow:hidden;background:rgba(255,255,255,.55);border:2px solid var(--ink);border-radius:999px;padding:3px 6px;min-width:0;height:34px;box-sizing:border-box}
+.q{flex:none;width:24px;height:24px;border-radius:50%;background:#dff3ff;border:2px solid #3a8ee6;display:grid;place-items:center;font-size:14px;transition:all .25s}
+.q.enemy{background:#ffe1ea;border-color:#e2436a}
+.q.now{width:30px;height:30px;font-size:19px;box-shadow:0 0 0 3px var(--sun)}
+.q-sep{flex:none;font-size:11px;font-weight:800;color:var(--muted);padding:0 2px}
+#arena{flex:1;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:22px 6px 10px;min-height:0}
+.row{display:flex;justify-content:space-around;align-items:flex-end;gap:4px}
+.unit{position:relative;width:31%;display:flex;flex-direction:column;align-items:center;cursor:default;border-radius:14px}
+.unit.boss{width:40%}
+.u-status{display:flex;gap:2px;font-size:12px;min-height:18px;font-weight:800;align-items:center}
+.u-status span{background:#fff;border:1.5px solid var(--ink);border-radius:8px;padding:0 3px;line-height:15px}
+.u-sprite{position:relative;font-size:clamp(46px,13vw,60px);line-height:1.05;z-index:2}
+.u-emoji{display:inline-block;animation:bob 2.2s ease-in-out infinite;filter:drop-shadow(0 3px 0 rgba(42,31,74,.28))}
+.enemy .u-emoji{transform:scaleX(-1)}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -6px}}
+.boss .u-sprite{font-size:clamp(78px,23vw,100px)}
+.u-shadow{width:62%;height:11px;border-radius:50%;background:rgba(42,31,74,.22);margin-top:-6px;transition:all .3s}
+.unit.active .u-shadow{background:radial-gradient(closest-side,rgba(255,197,49,1),rgba(255,197,49,0));transform:scale(1.7,1.4)}
+.unit.active::before{content:'▼';position:absolute;top:-16px;font-size:16px;color:var(--sun);-webkit-text-stroke:1.5px var(--ink);animation:arrow .6s ease-in-out infinite alternate;z-index:3}
+@keyframes arrow{to{transform:translateY(5px)}}
+.u-plate{background:var(--paper);border:2px solid var(--ink);border-radius:10px;padding:2px 6px 4px;width:100%;max-width:124px;box-sizing:border-box;margin-top:4px}
+.boss .u-plate{max-width:150px}
+.u-name{display:flex;align-items:center;gap:3px;font-weight:800;font-size:12px;line-height:18px;min-width:0}
+.u-type{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;border:1.5px solid var(--ink)}
+.u-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.u-lv{font-size:10px;color:var(--muted);flex:none}
+.u-hp{position:relative;height:9px;background:#e9e3f3;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.u-hp i{position:absolute;left:0;top:0;bottom:0;width:100%}
+.u-hp-lag{background:#ff9db8;transition:width .8s .35s}
+.u-hp-fill{background:var(--mint);transition:width .4s,background .3s}
+.u-hp-fill.mid{background:var(--sun)}
+.u-hp-fill.low{background:var(--danger)}
+.u-shield{background:repeating-linear-gradient(45deg,rgba(143,227,255,.95) 0 4px,rgba(255,255,255,.95) 4px 7px);left:auto!important;right:0;width:0;transition:width .3s}
+.u-meta{display:flex;align-items:center;gap:4px;margin-top:2px}
+.u-hpnum{font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--muted);flex:none}
+.u-en{flex:1;height:5px;border-radius:4px;background:#e9e3f3;overflow:hidden;border:1px solid rgba(42,31,74,.5)}
+.u-en i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sun),#ff9a3c);transition:width .4s}
+.unit.ult-ready .u-plate{box-shadow:0 0 0 2px var(--sun),0 0 14px 2px var(--sun)}
+.unit.ult-ready .u-en i{background:linear-gradient(90deg,var(--sun),var(--berry),var(--sun));background-size:200% 100%;animation:shine 1s linear infinite}
+@keyframes shine{to{background-position:-200% 0}}
+.unit.ko .u-emoji{animation:none;filter:grayscale(1);opacity:.35;transform:rotate(90deg) scale(.8)}
+.unit.ko .u-plate{opacity:.5}
+.unit.targetable{cursor:pointer}
+.unit.targetable .u-sprite::after{content:'';position:absolute;left:50%;top:50%;width:1.25em;height:1.25em;transform:translate(-50%,-50%);border:3px dashed var(--berry);border-radius:50%;animation:spin 2.5s linear infinite;box-sizing:border-box}
+.unit.targetable.ally-t .u-sprite::after{border-color:var(--mint)}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.unit.enter .u-sprite{animation:dropIn .6s cubic-bezier(.3,1.6,.6,1) backwards}
+@keyframes dropIn{from{transform:translateY(-60px) scale(.3);opacity:0}}
+#log{align-self:center;max-width:92%;text-align:center;background:rgba(255,250,242,.94);border:2.5px solid var(--ink);border-radius:999px;padding:5px 14px;font-weight:800;font-size:14px;line-height:1.25;min-height:20px;box-shadow:0 3px 0 rgba(42,31,74,.3)}
+#log.pop{animation:logpop .25s ease-out}
+@keyframes logpop{from{transform:scale(.85)}}
+
+#panel{position:relative;z-index:3;background:var(--paper);border-top:3px solid var(--ink);border-radius:24px 24px 0 0;padding:10px 12px 14px;min-height:206px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px}
+.p-top{display:flex;align-items:center;gap:8px}
+#cur{flex:1;display:flex;align-items:center;gap:6px;font-weight:800;font-size:15px;min-width:0}
+#cur .ce{font-size:26px}
+#cur .ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#paws{display:flex;gap:1px;font-size:17px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:1px 8px;flex:none}
+#paws span{opacity:.18;filter:grayscale(1);transition:all .25s}
+#paws span.on{opacity:1;filter:none;animation:pawpop .3s}
+@keyframes pawpop{50%{transform:scale(1.4)}}
+#p-choose{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act{position:relative;text-align:left;border:2.5px solid var(--ink);border-radius:14px;padding:6px 9px 7px;background:#fff;box-shadow:0 4px 0 var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:1px;min-width:0;min-height:68px;overflow:hidden}
+.act:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.a-tag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.a-name{font-family:var(--font-display);font-size:16px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-desc{font-size:11px;line-height:1.2;color:var(--muted);font-weight:700}
+.act.skill{background:#eaf5ff}
+.act.ult{background:linear-gradient(90deg,rgba(255,197,49,.5) var(--p,0%),#fff var(--p,0%))}
+.act.ult.ready{background:linear-gradient(110deg,#ffe27a,#ff9fc4,#ffe27a);background-size:200% 100%;animation:shine 1.4s linear infinite}
+.act.bag{background:#fff1d4}
+.act.off{opacity:.5}
+.act.off:active{transform:none;box-shadow:0 4px 0 var(--ink)}
+#p-target,#p-wait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;font-weight:800;font-size:16px}
+#p-wait .we{font-size:40px;animation:bob 1s ease-in-out infinite}
+#t-cancel{font-size:16px;padding:6px 18px}
+
+/* bag + pause */
+.bag-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.item{display:flex;align-items:center;gap:10px;text-align:left;background:#fff;border:2.5px solid var(--ink);border-radius:14px;padding:8px 10px;box-shadow:0 3px 0 var(--ink);cursor:pointer}
+.item .ii{font-size:30px;flex:none}
+.item .it{flex:1;min-width:0}
+.item .in{font-family:var(--font-display);font-size:17px}
+.item .id{font-size:12px;color:var(--muted);font-weight:700}
+.item .ic{font-family:var(--font-display);font-size:18px;flex:none}
+.item.empty{opacity:.45}
+.overlay{position:absolute;inset:0;z-index:25;background:rgba(29,21,54,.6);display:grid;place-items:center;padding:16px}
+.card{background:var(--paper);border:3px solid var(--ink);border-radius:22px;box-shadow:0 6px 0 var(--ink);padding:18px;display:flex;flex-direction:column;gap:12px;width:min(100%,300px);box-sizing:border-box}
+.card h3{font-family:var(--font-display);font-weight:400;font-size:30px;margin:0;text-align:center}
+
+/* ---------- FX ---------- */
+#fx{position:absolute;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.proj,.part,.fnum{position:absolute;left:0;top:0;pointer-events:none;will-change:transform}
+.proj{filter:drop-shadow(0 0 8px rgba(255,255,255,.9))}
+.fnum{font-family:var(--font-display);font-size:26px;color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;white-space:nowrap}
+.fnum.crit{font-size:36px;color:var(--sun)}
+.fnum.heal{color:var(--mint)}
+.fnum.shield{color:var(--shield)}
+.fnum.tag{font-size:17px;color:#fff;-webkit-text-stroke:2.5px var(--ink)}
+.fnum.tag.good{color:var(--sun)}
+.fnum.tag.bad{color:#ff8fb1}
+.fnum.miss{font-size:20px;color:#d9d4e8}
+#flash{position:absolute;inset:0;z-index:31;pointer-events:none;background:#fff;opacity:0}
+#banner{position:absolute;left:0;right:0;top:38%;z-index:45;text-align:center;pointer-events:none;font-family:var(--font-display);font-size:clamp(40px,13vw,60px);color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);line-height:1}
+#banner small{display:block;font-size:.4em;color:var(--sun);-webkit-text-stroke:2px var(--ink);text-shadow:0 3px 0 var(--ink);margin-bottom:4px}
+#ult{position:absolute;inset:0;z-index:40;pointer-events:none;background:radial-gradient(circle at 50% 50%,rgba(29,21,54,.35),rgba(29,21,54,.85));display:flex;align-items:center}
+.ult-band{width:140%;margin-left:-20%;transform:rotate(-8deg);display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 0;border-top:4px solid var(--ink);border-bottom:4px solid var(--ink);background:repeating-linear-gradient(90deg,var(--c1) 0 26px,var(--c2) 26px 52px);animation:band 1.3s cubic-bezier(.2,.9,.3,1) both}
+@keyframes band{0%{transform:rotate(-8deg) translateX(-100%)}25%{transform:rotate(-8deg) translateX(0)}80%{transform:rotate(-8deg) translateX(3%)}100%{transform:rotate(-8deg) translateX(110%)}}
+.ult-pet{font-size:96px;line-height:1;animation:ultpet 1.3s ease-out both;filter:drop-shadow(0 6px 0 rgba(0,0,0,.3))}
+@keyframes ultpet{0%{transform:scale(.3)}25%{transform:scale(1.25)}35%,100%{transform:scale(1)}}
+.ult-text{font-family:var(--font-display);color:#fff;-webkit-text-stroke:2.5px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink)}
+.ult-text small{display:block;font-size:16px;letter-spacing:.3em;color:var(--sun)}
+.ult-text b{font-weight:400;font-size:32px}
+#toast{position:absolute;left:16px;right:16px;bottom:224px;z-index:50;text-align:center;pointer-events:none}
+#toast span{display:inline-block;background:var(--ink);color:#fff;font-weight:800;font-size:14px;border-radius:12px;padding:7px 12px;animation:toast 2.2s ease both}
+@keyframes toast{0%{opacity:0;transform:translateY(8px)}10%,85%{opacity:1;transform:none}100%{opacity:0}}
+
+/* ---------- results ---------- */
+#result{align-items:center;justify-content:flex-start;padding:16px;overflow:auto}
+.res-card{margin-block:auto;background:var(--paper);border:3px solid var(--ink);border-radius:26px;box-shadow:0 7px 0 var(--ink);padding:18px 16px;width:100%;max-width:380px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;align-items:center;animation:sheetUp .45s cubic-bezier(.3,1.4,.6,1)}
+#res-title{font-family:var(--font-display);font-size:46px;line-height:1;color:var(--sun);-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ink)}
+#res-title.lose{color:#9fb3ff}
+.res-stars{display:flex;gap:6px;font-size:52px;line-height:1}
+.res-stars span{color:#ddd6ec;-webkit-text-stroke:2.5px var(--ink)}
+.res-stars span.on{color:var(--sun);animation:starpop .5s cubic-bezier(.3,1.8,.5,1) backwards}
+@keyframes starpop{from{transform:scale(0) rotate(-90deg)}}
+.goals{list-style:none;margin:0;padding:0;align-self:stretch;display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:14px}
+.goals li{display:flex;gap:8px;align-items:center}
+.goals li i{font-style:normal;width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font-size:12px;background:#eee;flex:none}
+.goals li.ok i{background:var(--mint)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-self:stretch}
+.stat{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:4px 6px;text-align:center;min-width:0}
+.stat b{display:block;font-family:var(--font-display);font-weight:400;font-size:19px;font-variant-numeric:tabular-nums}
+.stat small{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mvp{align-self:stretch;display:flex;align-items:center;gap:10px;background:#fff3c4;border:2px solid var(--ink);border-radius:14px;padding:6px 12px;font-weight:800}
+.mvp .me{font-size:38px}
+.unlock{align-self:stretch;text-align:center;background:#e6fff4;border:2px dashed var(--ink);border-radius:14px;padding:8px;font-weight:800}
+.res-btns{display:flex;flex-direction:column;gap:10px;align-self:stretch}
+.res-btns .row2{display:flex;gap:10px}
+.res-btns .row2 .btn{flex:1;font-size:18px;padding:9px 10px}
+
+/* ---------- manual ---------- */
+#manual{background:var(--paper)}
+#manual .bar h2{color:var(--ink);-webkit-text-stroke:0;text-shadow:none}
+.tabs{display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;flex:none}
+.tab{flex:none;font-weight:800;font-size:14px;background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
+.tab.on{background:var(--ink);color:#fff}
+.mbody{flex:1;overflow:auto;padding:4px 16px 24px;line-height:1.5;font-size:15px}
+.mbody h4{font-family:var(--font-display);font-weight:400;font-size:21px;margin:14px 0 6px}
+.mbody p{margin:0 0 8px;max-width:62ch}
+.mbody .box{background:#fff;border:2.5px solid var(--ink);border-radius:16px;padding:10px 12px;margin-bottom:10px}
+.mbody ol{padding-left:22px;margin:0 0 8px}
+.mbody ol li{margin-bottom:4px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:start}
+.kv dt{font-size:22px;line-height:1.2}
+.kv dd{margin:0;font-size:14px}
+.kv dd b{font-family:var(--font-display);font-weight:400;font-size:16px}
+.matrix-wrap{overflow-x:auto}
+.matrix{border-collapse:separate;border-spacing:4px;font-weight:800;text-align:center}
+.matrix th{font-size:12px;padding:2px 4px}
+.matrix td{width:52px;height:38px;border:2px solid var(--ink);border-radius:10px;background:#fff;font-size:13px}
+.matrix td.up{background:#c9f7df}
+.matrix td.down{background:#ffd6de}
+.dex{display:flex;gap:10px;align-items:flex-start}
+.dex .de{font-size:44px;line-height:1}
+.dex .dn{font-family:var(--font-display);font-size:19px}
+.dex ul{margin:4px 0 0;padding-left:18px;font-size:13.5px}
+
+/* ---------- demo ---------- */
+#demo-block{position:absolute;inset:0;z-index:60}
+#demo-ui{position:absolute;top:58px;right:10px;z-index:70;display:flex;gap:6px;align-items:center}
+#demo-ui .dtag{font-family:var(--font-display);background:var(--berry);color:#fff;border:2.5px solid var(--ink);border-radius:10px;padding:2px 8px;animation:pulse 1.4s infinite}
+#demo-skip{font-weight:800;font-size:13px;background:#fff;border:2.5px solid var(--ink);border-radius:10px;padding:4px 10px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+#demo-cap{position:absolute;left:16px;right:16px;z-index:62;display:flex;justify-content:center;pointer-events:none;top:44%}
+#demo-cap.top{top:64px}
+#demo-cap.low{top:auto;bottom:24px}
+#demo-cap div{background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink);padding:10px 14px;font-weight:800;font-size:16px;line-height:1.35;text-align:center;max-width:340px;animation:logpop .3s ease-out}
+#hand{position:absolute;left:0;top:0;z-index:65;pointer-events:none;transition:transform .6s cubic-bezier(.4,0,.2,1)}
+#hand span{position:absolute;left:-15px;top:-4px;font-size:42px;filter:drop-shadow(0 4px 2px rgba(0,0,0,.35));transition:transform .15s}
+#hand.press span{transform:scale(.82) translateY(4px)}
+#hand .ring{position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;border:4px solid var(--berry);opacity:0}
+#hand.press .ring{animation:ring .5s ease-out}
+@keyframes ring{from{opacity:1;transform:scale(.3)}to{opacity:0;transform:scale(1.4)}}
+
+/* ---------- v2: guard / intents / combos / treats ---------- */
+.u-guardrow{display:flex;align-items:center;gap:3px;margin-top:2px;font-size:10px;font-weight:800}
+.u-guard{flex:1;height:6px;border-radius:4px;background:#e9e3f3;border:1px solid rgba(42,31,74,.6);overflow:hidden}
+.u-guard i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#fff,#b9c6ff);transition:width .3s}
+.u-wk{flex:none;letter-spacing:-1px}
+.u-intent{position:absolute;top:12px;right:-4px;z-index:4;background:#fff;border:2px solid var(--ink);border-radius:10px 10px 10px 2px;padding:0 5px;font-size:10.5px;font-weight:800;white-space:nowrap;box-shadow:0 2px 0 var(--ink);animation:bob 1.6s ease-in-out infinite}
+.u-intent.warn{background:#fff3c4}
+.u-intent.danger{background:var(--berry);color:#fff;animation:pulse .6s infinite}
+.unit.broken .u-emoji{filter:saturate(.3) brightness(1.1)}
+.unit.broken .u-sprite::before{content:'💫';position:absolute;top:-10px;left:50%;font-size:20px;animation:dizzy 1s linear infinite;z-index:3}
+@keyframes dizzy{from{transform:translateX(-50%) rotate(0)}to{transform:translateX(-50%) rotate(360deg)}}
+.unit.charging .u-emoji{animation:chargeGlow .45s ease-in-out infinite alternate}
+@keyframes chargeGlow{from{filter:drop-shadow(0 0 6px #ff4f8b)}to{filter:drop-shadow(0 0 18px #ff4f8b) drop-shadow(0 0 26px #ffc531)}}
+.beam{position:absolute;left:0;top:0;height:16px;margin-top:-8px;border-radius:10px;transform-origin:0 50%;pointer-events:none}
+.zap{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.ring{position:absolute;left:0;top:0;width:80px;height:80px;margin:-40px 0 0 -40px;border-radius:50%;border:5px solid #fff;box-sizing:border-box;pointer-events:none}
+.shard{position:absolute;left:0;top:0;width:14px;height:20px;background:linear-gradient(135deg,#fff,#9fb3ff);clip-path:polygon(50% 0,100% 60%,40% 100%,0 40%);pointer-events:none}
+.fnum.tag.combo{font-size:20px;color:#8ff7ff}
+.treats-chip{flex:none;font-weight:800;font-size:13px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.bump{animation:pawpop .25s}
+.res-treats{align-self:stretch;display:flex;align-items:center;gap:10px;background:#fff1d4;border:2px solid var(--ink);border-radius:14px;padding:6px 12px;font-weight:800}
+.res-treats .jar{font-size:34px;display:inline-block}
+.res-treats b{font-family:var(--font-display);font-weight:400;font-size:28px;font-variant-numeric:tabular-nums}
+.res-treats small{display:block;color:var(--muted);font-size:11.5px}
+.map-foot{padding:0 16px 16px;display:flex;justify-content:center}
+.train-row{display:flex;align-items:center;gap:10px;background:#fff;border:2.5px solid var(--ink);border-radius:14px;padding:8px 10px;box-shadow:0 3px 0 var(--ink)}
+.train-row .te{font-size:34px}
+.train-row .tt{flex:1;min-width:0}
+.train-row .tn{font-family:var(--font-display);font-size:17px}
+.train-row .ts{font-size:12px;color:var(--muted);font-weight:700}
+.train-row .btn{font-size:15px;padding:6px 10px;flex:none}
+.rank{color:var(--sun);-webkit-text-stroke:1px var(--ink);letter-spacing:1px}
+
+/* ---------- befriend ---------- */
+.catch-card{width:min(100%,340px);max-height:100%;overflow:auto}
+.catch-col{display:flex;flex-direction:column;gap:12px}
+.c-sub{margin:0;text-align:center;font-weight:700;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.c-arena{position:relative;height:170px;display:grid;place-items:center;background:radial-gradient(circle at 50% 75%,#d9fbe9,#fffaf2 72%);border:2.5px solid var(--ink);border-radius:18px;overflow:hidden}
+.c-pet{font-size:86px;line-height:1;display:inline-block;filter:drop-shadow(0 4px 0 rgba(42,31,74,.25))}
+.c-snack{position:absolute;left:50%;bottom:-36px;font-size:34px;transform:translateX(-50%)}
+.c-msg{text-align:center;font-weight:800;font-size:16px;min-height:48px;line-height:1.35}
+.c-msg small{font-weight:700;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){
+  .u-emoji,#bg .deco,.parade span,.node.next .disc,.unit.active::before,.unit.targetable .u-sprite::after{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="bg"></div>
+
+  <!-- TITLE -->
+  <section id="title" class="screen active" aria-label="Title">
+    <div class="t-top"><button class="icon-btn snd" aria-label="Toggle sound">🔊</button></div>
+    <div class="logo">
+      <div class="logo-sub">萌寵大亂鬥</div>
+      <h1>Pawsome<br><span>Clash</span></h1>
+      <div class="logo-tag">Cute pets. Turn-based battles. Big hearts.</div>
+    </div>
+    <div class="parade" aria-hidden="true"><span>🐶</span><span style="animation-delay:.15s">🐱</span><span style="animation-delay:.3s">🐰</span><span style="animation-delay:.45s">🐹</span><span style="animation-delay:.6s">🐧</span></div>
+    <div class="menu">
+      <button class="btn" id="btn-start">▶ Start Adventure</button>
+      <button class="btn blue" id="btn-manual">📖 How to Play</button>
+      <button class="btn pink" id="btn-demo">🎬 Watch Demo</button>
+    </div>
+    <div class="progress" id="title-progress"></div>
+    <button class="linkbtn" id="btn-reset">Reset progress</button>
+  </section>
+
+  <!-- MAP -->
+  <section id="map" class="screen" aria-label="Adventure map">
+    <header class="bar"><button class="icon-btn" id="map-back" aria-label="Back">←</button><h2>Adventure Map</h2><span class="chip" id="map-stars">⭐ 0</span></header>
+    <div id="map-path"></div>
+    <div class="map-foot"><button class="btn" id="btn-train">🏋️ Pet Training · 🍪 <span id="map-treats">0</span></button></div>
+  </section>
+
+  <!-- MANUAL -->
+  <section id="manual" class="screen" aria-label="How to play">
+    <header class="bar"><button class="icon-btn" id="man-back" aria-label="Back">←</button><h2>How to Play</h2></header>
+    <nav class="tabs" id="man-tabs"></nav>
+    <div class="mbody" id="man-body"></div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="battle" class="screen" aria-label="Battle">
+    <header class="bbar">
+      <button class="icon-btn" id="b-pause" aria-label="Pause">❚❚</button>
+      <span class="round" id="b-round">R1</span>
+      <div id="queue" aria-label="Turn order"></div>
+      <span class="treats-chip" id="b-treats" title="Treats collected">🍪 0</span>
+      <button class="icon-btn" id="b-speed" aria-label="Battle speed">1×</button>
+    </header>
+    <div id="arena">
+      <div class="row" id="enemy-row"></div>
+      <div id="log">Get ready!</div>
+      <div class="row" id="player-row"></div>
+    </div>
+    <div id="panel">
+      <div class="p-top"><div id="cur"></div><div id="paws" aria-label="Paw Points"></div></div>
+      <div id="p-choose">
+        <button class="act basic" id="act-basic"></button>
+        <button class="act skill" id="act-skill"></button>
+        <button class="act ult" id="act-ult"></button>
+        <button class="act bag" id="act-bag"><span class="a-tag">Items · uses your turn</span><span class="a-name">🎒 Bag</span><span class="a-desc" id="bag-sum"></span></button>
+      </div>
+      <div id="p-target" hidden><span id="t-hint"></span><button class="btn ghost" id="t-cancel">Cancel</button></div>
+      <div id="p-wait" hidden><span class="we" id="w-emoji"></span><span id="w-text"></span></div>
+    </div>
+    <div class="sheet-wrap" id="bag" hidden>
+      <div class="sheet">
+        <div class="sheet-head"><div style="flex:1"><div class="eyebrow">Using an item takes this pet's turn</div><h3>🎒 Bag</h3></div><button class="icon-btn" id="bag-close" aria-label="Close bag">✕</button></div>
+        <div class="bag-list" id="bag-list"></div>
+      </div>
+    </div>
+    <div class="overlay" id="pause" hidden>
+      <div class="card">
+        <h3>Paused</h3>
+        <button class="btn mint" id="p-resume">Resume</button>
+        <button class="btn blue" id="p-manual">📖 How to Play</button>
+        <button class="btn ghost snd">🔊 Sound</button>
+        <button class="btn pink" id="p-quit">Quit to Map</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="screen" aria-label="Results">
+    <div class="res-card">
+      <div id="res-title">Victory!</div>
+      <div class="eyebrow" id="res-stage"></div>
+      <div class="res-stars" id="res-stars"></div>
+      <ul class="goals" id="res-goals"></ul>
+      <div class="stats" id="res-stats"></div>
+      <div class="mvp" id="res-mvp"></div>
+      <div class="res-treats" id="res-treats"></div>
+      <div class="unlock" id="res-unlock" hidden></div>
+      <div class="res-btns">
+        <button class="btn pink" id="res-next">Next Stage ▶</button>
+        <div class="row2"><button class="btn" id="res-retry">↻ Retry</button><button class="btn ghost" id="res-map">🗺️ Map</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM PICK -->
+  <div class="sheet-wrap" id="team" hidden>
+    <div class="sheet">
+      <div class="sheet-head"><div style="flex:1"><div class="eyebrow" id="tm-num"></div><h3 id="tm-name"></h3></div><button class="icon-btn" id="tm-close" aria-label="Close">✕</button></div>
+      <div class="foes" id="tm-foes"></div>
+      <p class="tip" id="tm-tip"></p>
+      <div class="tm-label"><span>Choose your team</span><span id="tm-count">0/3</span></div>
+      <div class="tm-grid" id="tm-pets"></div>
+      <button class="btn pink" id="btn-fight">Let's Battle!</button>
+    </div>
+  </div>
+
+  <!-- BEFRIEND (capture) -->
+  <div class="overlay" id="catch" hidden>
+    <div class="card catch-card">
+      <div id="catch-pick" class="catch-col">
+        <div class="eyebrow" style="text-align:center">Victory bonus · one try</div>
+        <h3>Befriend a wild pet!</h3>
+        <p class="c-sub">Pick one wild pet from this stage. Weaker pets are easier to befriend. <span id="catch-stars"></span></p>
+        <div class="bag-list" id="catch-list" style="margin:0"></div>
+        <button class="btn ghost" id="catch-skip">No thanks</button>
+      </div>
+      <div id="catch-stage" class="catch-col" hidden>
+        <div class="c-arena"><span class="c-pet" id="c-pet">🐸</span><span class="c-snack" id="c-snack">🍙</span></div>
+        <div class="c-msg" id="c-msg"></div>
+        <button class="btn pink" id="c-continue" hidden>Continue ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAINING -->
+  <div class="sheet-wrap" id="train" hidden>
+    <div class="sheet">
+      <div class="sheet-head"><div style="flex:1"><div class="eyebrow">Spend treats to make pets stronger</div><h3>🏋️ Pet Training</h3></div><button class="icon-btn" id="train-close" aria-label="Close">✕</button></div>
+      <p class="tip" id="train-bank"></p>
+      <div class="bag-list" id="train-list"></div>
+    </div>
+  </div>
+
+  <div id="fx"></div>
+  <div id="flash"></div>
+  <div id="ult" hidden><div class="ult-band"><span class="ult-pet"></span><div class="ult-text"><small>ULTIMATE</small><b></b></div></div></div>
+  <div id="banner" hidden></div>
+  <div id="toast"></div>
+  <div id="demo-block" hidden></div>
+  <div id="demo-cap" hidden></div>
+  <div id="hand" hidden><div class="ring"></div><span>👆</span></div>
+  <div id="demo-ui" hidden><span class="dtag">🎬 DEMO</span><button id="demo-skip">Skip ✕</button></div>
+</div>
+
+<script>
+/* =========================================================
+   DATA — pets, moves, items, stages (edit these to change the game!)
+   ========================================================= */
+const TYPES = {
+  fire:  { name:'Fire',  icon:'🔥', color:'#ff6b3d' },
+  water: { name:'Water', icon:'💧', color:'#2f9bff' },
+  leaf:  { name:'Leaf',  icon:'🍃', color:'#35b85a' },
+  spark: { name:'Spark', icon:'⚡', color:'#f5b400' },
+};
+const STRONG = { fire:'leaf', water:'fire', leaf:'water', spark:'water' };   // attacker -> defender it beats
+const WEAK   = { fire:'water', water:'leaf', leaf:'fire', spark:'leaf' };    // attacker -> defender it struggles with
+function eff(a, d){ return STRONG[a]===d ? 1.5 : WEAK[a]===d ? 0.6 : 1; }
+
+const STATUS = {
+  burn:   { icon:'🔥', name:'Burn',      bad:true,  desc:'Loses 7% HP at the start of each turn.' },
+  para:   { icon:'⚡', name:'Paralyzed', bad:true,  desc:'50% chance to miss its next turn.' },
+  freeze: { icon:'🧊', name:'Frozen',    bad:true,  desc:'Skips its next turn.' },
+  sleep:  { icon:'💤', name:'Asleep',    bad:true,  desc:'Skips its next turn.' },
+  slow:   { icon:'🐌', name:'Slowed',    bad:true,  desc:'Speed down 30%, so it moves later.' },
+  atkDown:{ icon:'🥺', name:'ATK Down',  bad:true,  desc:'Deals 30% less damage.' },
+  atkUp:  { icon:'💪', name:'ATK Up',    bad:false, desc:'Deals 40% more damage.' },
+  broken: { icon:'💔', name:'Broken',    bad:true,  desc:'Guard shattered: skips its next turn and takes 25% more damage.' },
+};
+
+const PETS = {
+  ember: { name:'Emberpup', emoji:'🐶', type:'fire', role:'Attacker', hp:340, atk:70, def:45, spd:86,
+    ability:{ id:'blaze', name:'Blaze Heart', desc:'Deals 40% more damage when its HP is below 40%.' },
+    moves:[
+      { slot:'basic', name:'Ember Nibble', type:'fire', target:'enemy', power:32, desc:'A warm little bite.' },
+      { slot:'skill', name:'Flame Fetch', type:'fire', target:'enemy', power:58, status:{id:'burn',chance:.5,turns:2}, desc:'Big fiery hit. 50% Burn.' },
+      { slot:'ult', name:'Sunny Inferno', type:'fire', target:'enemies', power:52, status:{id:'burn',chance:.6,turns:2}, desc:'Hits ALL foes. 60% Burn.' } ] },
+  bubble: { name:'Bubblecat', emoji:'🐱', type:'water', role:'Support', hp:360, atk:58, def:52, spd:80,
+    ability:{ id:'softfur', name:'Soft Fur', desc:'Takes 15% less damage.' },
+    moves:[
+      { slot:'basic', name:'Bubble Pop', type:'water', target:'enemy', power:30, desc:'Pops a bubble on a foe.' },
+      { slot:'skill', name:'Healing Purr', type:'water', target:'ally', heal:.38, cleanse:true, desc:'Heal an ally 38% + cure bad effects.' },
+      { slot:'ult', name:'Tidal Cuddle', type:'water', target:'enemies', power:48, status:{id:'slow',chance:1,turns:2}, desc:'Wave hits ALL foes and Slows them.' } ] },
+  leaf: { name:'Leafbun', emoji:'🐰', type:'leaf', role:'Healer', hp:330, atk:56, def:50, spd:76,
+    ability:{ id:'sunbathe', name:'Sunbathe', desc:'Heals 6% HP at the start of each of its turns.' },
+    moves:[
+      { slot:'basic', name:'Seed Toss', type:'leaf', target:'enemy', power:30, desc:'Flicks a hard seed.' },
+      { slot:'skill', name:'Clover Charm', type:'leaf', target:'allies', buff:{id:'atkUp',turns:3}, desc:'Whole team: ATK Up for 3 turns.' },
+      { slot:'ult', name:'Blossom Bloom', type:'leaf', target:'allies', heal:.4, revive:.3, desc:'Heal team 40% + revive fainted pets.' } ] },
+  zippy: { name:'Zippy', emoji:'🐹', type:'spark', role:'Speedster', hp:300, atk:66, def:40, spd:106, unlock:0,
+    ability:{ id:'zoomies', name:'Zoomies', desc:'Charges its Ultimate 50% faster.' },
+    moves:[
+      { slot:'basic', name:'Static Nuzzle', type:'spark', target:'enemy', power:30, status:{id:'para',chance:.2,turns:1}, desc:'Cheek zap. 20% Paralyze.' },
+      { slot:'skill', name:'Zip Zap', type:'spark', target:'enemy', power:52, status:{id:'para',chance:.5,turns:1}, desc:'Lightning dash. 50% Paralyze.' },
+      { slot:'ult', name:'Thunder Wheel', type:'spark', target:'enemies', power:50, status:{id:'para',chance:.5,turns:1}, desc:'Hits ALL foes. 50% Paralyze.' } ] },
+  pud: { name:'Puddington', emoji:'🐧', type:'water', role:'Tank', hp:460, atk:56, def:64, spd:58, unlock:2,
+    ability:{ id:'blubber', name:'Thick Blubber', desc:'Can never be Burned.' },
+    moves:[
+      { slot:'basic', name:'Belly Slide', type:'water', target:'enemy', power:32, desc:'Wheee! Slides into a foe.' },
+      { slot:'skill', name:'Snow Fort', type:'water', target:'allies', shield:.22, desc:'Shield the team (22% of max HP).' },
+      { slot:'ult', name:'Glacier Hug', type:'water', target:'enemy', power:72, status:{id:'freeze',chance:1,turns:1}, desc:'Huge hit that Freezes a foe.' } ] },
+};
+
+const ENEMIES = {
+  froggo: { name:'Froggo', emoji:'🐸', type:'water', hp:260, atk:50, def:40, spd:72,
+    ability:{ id:'dodge', name:'Slippery', desc:'15% chance to dodge an attack.' },
+    moves:[ { slot:'basic', name:'Tongue Flick', type:'water', target:'enemy', power:30, desc:'A quick sticky lick.' },
+            { slot:'skill', name:'Puddle Jump', type:'water', target:'enemy', power:44, status:{id:'slow',chance:.5,turns:2}, desc:'Splash! 50% Slow.' } ] },
+  chickzap: { name:'Chickzap', emoji:'🐥', type:'spark', hp:220, atk:52, def:36, spd:96,
+    ability:{ id:'none', name:'Early Bird', desc:'Very fast, very fluffy.' },
+    moves:[ { slot:'basic', name:'Peck Zap', type:'spark', target:'enemy', power:30, status:{id:'para',chance:.2,turns:1}, desc:'20% Paralyze.' },
+            { slot:'skill', name:'Fluff Storm', type:'spark', target:'enemies', power:24, desc:'Feathers hit ALL foes.' } ] },
+  octobub: { name:'Octobub', emoji:'🐙', type:'water', hp:300, atk:52, def:46, spd:62,
+    ability:{ id:'none', name:'Eight Arms', desc:'Loves group hugs.' },
+    moves:[ { slot:'basic', name:'Ink Squirt', type:'water', target:'enemy', power:30, status:{id:'atkDown',chance:.4,turns:2}, desc:'40% ATK Down.' },
+            { slot:'skill', name:'Eight Hugs', type:'water', target:'enemies', power:26, desc:'Squeezes ALL foes.' } ] },
+  foxie: { name:'Foxie', emoji:'🦊', type:'fire', hp:280, atk:60, def:42, spd:88,
+    ability:{ id:'none', name:'Sly Tail', desc:'Hits hard and fast.' },
+    moves:[ { slot:'basic', name:'Fox Fire', type:'fire', target:'enemy', power:32, status:{id:'burn',chance:.3,turns:2}, desc:'30% Burn.' },
+            { slot:'skill', name:'Tail Blaze', type:'fire', target:'enemy', power:52, desc:'A blazing tail whip.' } ] },
+  pandaroo: { name:'Pandaroo', emoji:'🐼', type:'leaf', hp:380, atk:56, def:56, spd:50,
+    ability:{ id:'softfur', name:'Chonky', desc:'Takes 15% less damage.' },
+    moves:[ { slot:'basic', name:'Bamboo Bonk', type:'leaf', target:'enemy', power:34, desc:'Bonk!' },
+            { slot:'skill', name:'Munch Munch', type:'leaf', target:'self', heal:.3, desc:'Snacks to heal 30%.' } ] },
+  snoozala: { name:'Snoozala', emoji:'🐨', type:'leaf', hp:300, atk:50, def:50, spd:66,
+    ability:{ id:'none', name:'Drowsy', desc:'Makes everyone sleepy.' },
+    moves:[ { slot:'basic', name:'Leafy Pat', type:'leaf', target:'enemy', power:30, desc:'A gentle-ish pat.' },
+            { slot:'skill', name:'Lullaby', type:'leaf', target:'enemy', status:{id:'sleep',chance:.7,turns:1}, desc:'70% put a foe to Sleep.' } ] },
+  beebuzz: { name:'Beebuzz', emoji:'🐝', type:'spark', hp:230, atk:58, def:38, spd:102,
+    ability:{ id:'none', name:'Busy Bee', desc:'Fastest wing in the woods.' },
+    moves:[ { slot:'basic', name:'Buzz Sting', type:'spark', target:'enemy', power:32, status:{id:'para',chance:.25,turns:1}, desc:'25% Paralyze.' },
+            { slot:'skill', name:'Honey Glaze', type:'spark', target:'ally', heal:.25, desc:'Heals an ally 25%.' } ] },
+  dragonpuff: { name:'Dragonpuff', emoji:'🐲', type:'fire', hp:820, atk:64, def:58, spd:76, boss:true,
+    ability:{ id:'boss', name:'Royal Pride', desc:"Can't be Frozen, Paralyzed or put to Sleep." },
+    moves:[ { slot:'basic', name:'Choco Breath', type:'fire', target:'enemy', power:38, status:{id:'burn',chance:.35,turns:2}, desc:'35% Burn.' },
+            { slot:'skill', name:'Tail Spin', type:'fire', target:'enemies', power:28, desc:'Hits ALL foes.' },
+            { slot:'ult', name:'Cocoa Eruption', type:'fire', target:'enemies', power:48, status:{id:'burn',chance:.5,turns:2}, desc:'Erupts on ALL foes. 50% Burn.' } ] },
+  glimmer: { name:'Glimmerfly', emoji:'🦋', type:'leaf', hp:220, atk:50, def:40, spd:90,
+    ability:{ id:'none', name:'Sparkle Dust', desc:'Keeps its friends healthy.' },
+    moves:[ { slot:'basic', name:'Dust Flutter', type:'leaf', target:'enemy', power:28, status:{id:'sleep',chance:.15,turns:1}, desc:'15% Sleep.' },
+            { slot:'skill', name:'Healing Pollen', type:'leaf', target:'allies', heal:.15, desc:'Heals its team 15%.' } ] },
+  starcorn: { name:'Starcorn', emoji:'🦄', type:'spark', hp:1050, atk:70, def:62, spd:84, boss:true,
+    ability:{ id:'boss', name:'Royal Pride', desc:"Can't be Frozen, Paralyzed or put to Sleep." },
+    moves:[ { slot:'basic', name:'Horn Spark', type:'spark', target:'enemy', power:40, status:{id:'para',chance:.25,turns:1}, desc:'25% Paralyze.' },
+            { slot:'skill', name:'Rainbow Wish', type:'spark', target:'self', heal:.15, buff:{id:'atkUp',turns:3}, desc:'Heals 15% and powers up.' },
+            { slot:'ult', name:'Rainbow Nova', type:'spark', target:'enemies', power:55, desc:'Rainbow blast on ALL foes.' } ] },
+};
+
+const ITEMS = [
+  { id:'juice',  name:'Berry Juice',     icon:'🧃', count:3, target:'ally',   heal:.5,  desc:'Heals one pet 50% HP.' },
+  { id:'cake',   name:'Party Cake',      icon:'🍰', count:1, target:'allies', heal:.25, desc:'Heals the whole team 25% HP.' },
+  { id:'bell',   name:'Power Bell',      icon:'🔔', count:2, target:'ally',   buff:{id:'atkUp',turns:3}, desc:'ATK Up for 3 turns.' },
+  { id:'shield', name:'Bubble Shield',   icon:'🫧', count:2, target:'ally',   shield:.3, desc:'Blocks damage worth 30% max HP.' },
+  { id:'feather',name:'Phoenix Feather', icon:'🪶', count:1, target:'ko',     revive:.5, desc:'Revives a fainted pet with 50% HP.' },
+  { id:'candy',  name:'Energy Candy',    icon:'🍬', count:1, target:'ally',   energy:100, desc:"Fills a pet's Ultimate meter." },
+];
+
+const STAGES = [
+  { name:'Daisy Meadow',    icon:'🌼', lvl:1,    par:6,  enemies:['froggo','chickzap'],            sky:['#8fd8ff','#dff6ff'], ground:['#a6e07a','#6cc451'], deco:['☁️','🌼','🦋','🌷'], blurb:'A sunny warm-up in the flower fields.' },
+  { name:'Bubble Beach',    icon:'🏖️', lvl:1.15, par:7,  enemies:['octobub','froggo','foxie'],     sky:['#6fd0ff','#c9f1ff'], ground:['#ffe6ad','#ffcf78'], deco:['🫧','🐚','☁️','🌊'], blurb:'Splashy foes and one hot-headed fox.' },
+  { name:'Candy Woods',     icon:'🍭', lvl:1.3,  par:8,  enemies:['pandaroo','snoozala','beebuzz'],sky:['#ffb9dc','#ffe7f3'], ground:['#cfa6ff','#9f74ee'], deco:['🍭','🍬','🍩','🧁'], blurb:'Sweet, sleepy, and buzzing with trouble.' },
+  { name:'Cocoa Volcano',   icon:'🌋', lvl:1.45, par:9,  enemies:['foxie','dragonpuff','foxie'],   sky:['#ff8d63','#ffd2a6'], ground:['#946049','#5f3626'], deco:['✨','🍫','🔥','☁️'], blurb:'BOSS: Dragonpuff guards the chocolate.' },
+  { name:'Starlight Castle',icon:'🏰', lvl:1.6,  par:10, enemies:['glimmer','starcorn','glimmer'], sky:['#23266a','#6c4fb8'], ground:['#3f2f80','#1f1748'], deco:['⭐','✨','🌙','💫'], blurb:'FINAL BOSS: Starcorn, queen of the night.' },
+];
+
+// Ultimates that wild pets learn only after they join your team
+const PET_ULTS = {
+  froggo:   { slot:'ult', name:'Monsoon Croak',  type:'water', target:'enemies', power:46, status:{id:'slow',chance:.5,turns:2}, anim:'wave', desc:'Rain on ALL foes. 50% Slow.' },
+  chickzap: { slot:'ult', name:'Sky Dive Spark', type:'spark', target:'enemy',   power:78, status:{id:'para',chance:.5,turns:1}, anim:'zap',  desc:'Huge zap on one foe. 50% Paralyze.' },
+  octobub:  { slot:'ult', name:'Ink Tsunami',    type:'water', target:'enemies', power:44, status:{id:'atkDown',chance:.6,turns:2}, anim:'wave', desc:'Hits ALL foes. 60% ATK Down.' },
+  foxie:    { slot:'ult', name:'Nine-Tail Blaze',type:'fire',  target:'enemies', power:50, status:{id:'burn',chance:.5,turns:2}, anim:'rain', desc:'Fire rain on ALL foes. 50% Burn.' },
+  pandaroo: { slot:'ult', name:'Bamboo Feast',   type:'leaf',  target:'allies',  heal:.35, shield:.12, desc:'Team heals 35% and gets a small shield.' },
+  snoozala: { slot:'ult', name:'Dreamy Hug',     type:'leaf',  target:'enemies', power:36, status:{id:'sleep',chance:.5,turns:1}, anim:'wave', desc:'Hits ALL foes. 50% Sleep.' },
+  beebuzz:  { slot:'ult', name:'Swarm Rush',     type:'spark', target:'enemies', power:48, status:{id:'para',chance:.35,turns:1}, anim:'rain', desc:'Bees hit ALL foes. 35% Paralyze.' },
+  glimmer:  { slot:'ult', name:'Aurora Pollen',  type:'leaf',  target:'allies',  heal:.25, buff:{id:'atkUp',turns:3}, desc:'Team heals 25% and gets ATK Up.' },
+};
+Object.entries(PET_ULTS).forEach(([k,m]) => ENEMIES[k].petUlt = m);
+
+// A wild pet's stats once it joins you. Bosses calm down a bit when they become friends.
+const CAUGHT_DEFS = {};
+function caughtDef(k){
+  const e = ENEMIES[k]; if (!e) return null;
+  return CAUGHT_DEFS[k] ||= {
+    name:e.name, emoji:e.emoji, type:e.type, role: e.boss ? 'Ex-Boss friend' : 'Wild friend', caught:true,
+    hp: Math.round(e.hp * (e.boss ? .5 : 1.15)), atk: e.atk * (e.boss ? .92 : 1), def: e.def, spd: e.spd,
+    ability: e.ability, moves: e.boss ? e.moves : [...e.moves, e.petUlt],
+  };
+}
+const petDef = k => PETS[k] || caughtDef(k);
+const allPetKeys = () => [...Object.keys(PETS), ...(save.caught||[])];
+
+// Befriend chance: weaker wild pets are easier. Each star earned adds +5%.
+function petStrength(k){ const e = ENEMIES[k]; return e.hp + e.atk*4 + e.def*3 + e.spd*2; }
+function catchChance(k, stars=0){
+  const base = ENEMIES[k].boss ? .35 : Math.max(.5, Math.min(.9, 1.55 - petStrength(k)/1000));
+  return Math.min(.95, base + stars*.05);
+}
+const strengthLabel = k => ENEMIES[k].boss ? 'Very strong' : petStrength(k) < 760 ? 'Weak' : petStrength(k) < 840 ? 'Medium' : 'Strong';
+
+// How each move looks: projectile, volley, beam, zap, rain, wave, dash, pounce
+const ANIM = {
+  'Ember Nibble':'pounce', 'Flame Fetch':'dash', 'Sunny Inferno':'rain',
+  'Bubble Pop':'projectile', 'Tidal Cuddle':'wave', 'Seed Toss':'volley',
+  'Static Nuzzle':'dash', 'Zip Zap':'zap', 'Thunder Wheel':'zap',
+  'Belly Slide':'dash', 'Glacier Hug':'pounce',
+  'Tongue Flick':'beam', 'Puddle Jump':'pounce', 'Peck Zap':'dash', 'Fluff Storm':'rain',
+  'Ink Squirt':'projectile', 'Eight Hugs':'wave', 'Fox Fire':'projectile', 'Tail Blaze':'dash',
+  'Bamboo Bonk':'pounce', 'Leafy Pat':'dash', 'Buzz Sting':'dash',
+  'Choco Breath':'beam', 'Tail Spin':'wave', 'Cocoa Eruption':'rain',
+  'Dust Flutter':'volley', 'Horn Spark':'zap', 'Rainbow Nova':'beam',
+};
+[...Object.values(PETS), ...Object.values(ENEMIES)].forEach(p => [...p.moves, p.petUlt].filter(Boolean).forEach(m => m.anim = m.anim || ANIM[m.name] || 'projectile'));
+
+const GUARD_HIT = { weak:{ basic:20, skill:30, ult:40 }, other:{ basic:6, skill:10, ult:12 } };
+const TRAIN_COST = [25, 50, 90];
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+const SAVE_KEY = 'pawsome-clash-v1';
+const freshSave = () => ({ stars:{}, treats:0, train:{}, caught:[] });
+let save = freshSave();
+try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.stars) save = Object.assign(freshSave(), s); } catch(e) {}
+function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e) {} }
+const cleared = () => Object.keys(save.stars).length;
+const totalStars = () => Object.values(save.stars).reduce((a,b)=>a+b,0);
+const stageOpen = i => i===0 || save.stars[i-1] != null;
+const petOpen = k => PETS[k] ? (PETS[k].unlock == null || save.stars[PETS[k].unlock] != null) : save.caught.includes(k);
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const GAME = $('#game'), FX = $('#fx');
+const ABORT = { abort:true };
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let SPEED = 1, PAUSED = false, pauseQ = [], DEMO = false, B = null;
+const rand = (a,b) => a + Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const pct = x => Math.max(0, Math.min(100, x*100)) + '%';
+
+async function wait(ms){
+  const b = B;
+  await new Promise(r => setTimeout(r, ms*SPEED));
+  while (PAUSED) await new Promise(r => pauseQ.push(r));
+  if (!b || b !== B || b.aborted) throw ABORT;
+}
+async function dsleep(ms){
+  await new Promise(r => setTimeout(r, ms));
+  while (PAUSED) await new Promise(r => pauseQ.push(r));
+  if (!DEMO) throw ABORT;
+}
+function setPaused(p){ PAUSED = p; if (!p) pauseQ.splice(0).forEach(r => r()); }
+
+/* ---------- sound (tiny synth, no files needed) ---------- */
+const Snd = {
+  ctx:null, on:true,
+  init(){ try { if (!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); if (this.ctx.state==='suspended') this.ctx.resume(); } catch(e) {} },
+  tone(f, d=.12, type='square', v=.05, f2=null, delay=0){
+    const c = this.ctx; if (!c || !this.on) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t+d);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t+d);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t+d+.03);
+  },
+  noise(d=.15, v=.1){
+    const c = this.ctx; if (!c || !this.on) return;
+    const buf = c.createBuffer(1, c.sampleRate*d, c.sampleRate), data = buf.getChannelData(0);
+    for (let i=0;i<data.length;i++) data[i] = (Math.random()*2-1)*(1-i/data.length);
+    const s = c.createBufferSource(), g = c.createGain(), f = c.createBiquadFilter();
+    f.type='lowpass'; f.frequency.value=1800; s.buffer=buf; g.gain.value=v;
+    s.connect(f).connect(g).connect(c.destination); s.start();
+  },
+  play(n){
+    switch(n){
+      case 'tap': this.tone(720,.06,'square',.03); break;
+      case 'hit': this.noise(.14,.14); this.tone(220,.12,'square',.05,90); break;
+      case 'crit': this.noise(.25,.2); this.tone(320,.25,'sawtooth',.06,60); break;
+      case 'heal': [523,659,784,1047].forEach((f,i)=>this.tone(f,.16,'sine',.07,null,i*.07)); break;
+      case 'buff': this.tone(440,.25,'triangle',.07,990); break;
+      case 'status': this.tone(300,.18,'triangle',.06,200); break;
+      case 'ult': this.tone(180,.7,'sawtooth',.05,1100); this.tone(240,.7,'square',.03,1400,.05); break;
+      case 'ko': this.tone(600,.5,'triangle',.08,80); break;
+      case 'miss': this.tone(900,.12,'sine',.04,1300); break;
+      case 'start': [392,523,659].forEach((f,i)=>this.tone(f,.14,'square',.05,null,i*.1)); break;
+      case 'win': [523,659,784,1047,784,1047].forEach((f,i)=>this.tone(f,.2,'square',.05,null,i*.12)); break;
+      case 'lose': [392,349,311,262].forEach((f,i)=>this.tone(f,.3,'triangle',.07,null,i*.22)); break;
+      case 'break': this.noise(.35,.22); this.tone(1400,.35,'square',.05,300); this.tone(2200,.2,'sine',.05,900,.05); break;
+      case 'combo': [660,880,1175].forEach((f,i)=>this.tone(f,.1,'square',.045,null,i*.05)); break;
+      case 'coin': this.tone(1320,.07,'square',.025); this.tone(1760,.09,'square',.025,null,.05); break;
+      case 'charge': this.tone(140,.7,'sawtooth',.05,620); break;
+    }
+  }
+};
+function syncSoundButtons(){ $$('.snd').forEach(b => b.textContent = b.classList.contains('btn') ? (Snd.on?'🔊 Sound: On':'🔇 Sound: Off') : (Snd.on?'🔊':'🔇')); }
+$$('.snd').forEach(b => b.addEventListener('click', () => { Snd.on = !Snd.on; syncSoundButtons(); }));
+document.addEventListener('pointerdown', () => Snd.init(), { once:false, passive:true });
+
+/* ---------- screens & backgrounds ---------- */
+let curScreen = 'title', manualReturn = 'title';
+function showScreen(id){
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id===id));
+  curScreen = id;
+  if (id==='title') { renderTitle(); setBg('title'); }
+  if (id==='map') { renderMap(); setBg('map'); }
+}
+function setBg(kind){
+  const bg = $('#bg');
+  let grad, deco;
+  if (kind==='title') { grad = 'linear-gradient(180deg,#7fd0ff 0%,#c8eeff 55%,#9fe07c 55.3%,#6cc451 100%)'; deco = ['☁️','🐾','☁️','🌼','✨']; }
+  else if (kind==='map') { grad = 'radial-gradient(circle at 30% 20%,#c6f29b,#7fcf5c 70%)'; deco = ['🌳','🌼','🍄','🌷','🐾']; }
+  else { const st = kind; grad = `linear-gradient(180deg,${st.sky[0]} 0%,${st.sky[1]} 17%,${st.ground[0]} 17.4%,${st.ground[1]} 100%)`; deco = st.deco; }
+  bg.style.background = grad;
+  bg.innerHTML = '';
+  for (let i=0;i<12;i++){
+    const d = document.createElement('span'); d.className='deco'; d.textContent = deco[i%deco.length];
+    d.style.left = rand(-4,92)+'%'; d.style.top = rand(2, kind==='title'?50:92)+'%';
+    d.style.fontSize = rand(16,34)+'px'; d.style.setProperty('--d', rand(5,11)+'s'); d.style.animationDelay = -rand(0,8)+'s';
+    bg.append(d);
+  }
+}
+function toast(msg){ const t = $('#toast'); t.innerHTML = ''; const s = document.createElement('span'); s.textContent = msg; t.append(s); }
+
+/* =========================================================
+   TITLE / MAP / TEAM
+   ========================================================= */
+function renderTitle(){
+  const c = cleared();
+  $('#title-progress').textContent = c>=STAGES.length ? `🏆 Champion! ⭐ ${totalStars()} / 15` : `Stages ${c} / ${STAGES.length} · ⭐ ${totalStars()} / 15`;
+  $('#btn-reset').textContent = 'Reset progress'; $('#btn-reset').dataset.arm = '';
+}
+$('#btn-reset').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!b.dataset.arm) { b.dataset.arm = '1'; b.textContent = 'Tap again to erase all progress'; return; }
+  save = freshSave(); persist(); renderTitle(); toast('Progress reset.');
+});
+$('#btn-start').addEventListener('click', () => { Snd.play('tap'); showScreen('map'); });
+$('#btn-manual').addEventListener('click', () => { Snd.play('tap'); openManual('title'); });
+$('#btn-demo').addEventListener('click', () => { Snd.play('tap'); startDemo(); });
+$('#map-back').addEventListener('click', () => showScreen('title'));
+
+const MAP_POS = [[30,88],[70,69],[30,50],[70,31],[50,11]];
+function renderMap(){
+  $('#map-stars').textContent = `⭐ ${totalStars()}`;
+  $('#map-treats').textContent = save.treats||0;
+  const wrap = $('#map-path');
+  const pts = MAP_POS.map(p => p.join(',')).join(' ');
+  wrap.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="#2a1f4a" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><polyline points="${pts}" fill="none" stroke="#fff3c4" stroke-width="5" stroke-dasharray="2 10" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+  const next = STAGES.findIndex((_,i) => stageOpen(i) && save.stars[i]==null);
+  STAGES.forEach((st,i) => {
+    const n = document.createElement('button');
+    const open = stageOpen(i), s = save.stars[i];
+    n.className = 'node' + (open?'':' locked') + (i===next?' next':'');
+    n.id = 'node-'+i;
+    n.style.left = MAP_POS[i][0]+'%'; n.style.top = MAP_POS[i][1]+'%';
+    n.setAttribute('aria-label', `Stage ${i+1}: ${st.name}${open?'':' (locked)'}`);
+    n.innerHTML = `<span class="disc">${st.icon}</span><span class="lbl">${i+1} · ${st.name}</span><span class="stars">${s!=null ? '★'.repeat(s)+'☆'.repeat(3-s) : ''}</span>`;
+    n.addEventListener('click', () => {
+      if (!open) { toast(`Clear Stage ${i} first to unlock this one.`); return; }
+      Snd.play('tap'); openTeam(i);
+    });
+    wrap.append(n);
+  });
+}
+
+/* ---------- pet training (spend treats) ---------- */
+$('#btn-train').addEventListener('click', () => { Snd.play('tap'); renderTrain(); $('#train').hidden = false; });
+$('#train-close').addEventListener('click', () => $('#train').hidden = true);
+function renderTrain(){
+  const have = save.treats||0;
+  $('#train-bank').innerHTML = `You have <b>🍪 ${have}</b> treats. Each training rank gives a pet <b>+8% HP, ATK and DEF</b> (up to 3 ranks). Earn treats by knocking out wild pets and winning stars.`;
+  $('#train-list').innerHTML = allPetKeys().filter(petOpen).map(k => [k, petDef(k)]).map(([k,p]) => {
+    const r = save.train[k]||0, cost = TRAIN_COST[r];
+    return `<div class="train-row" id="tr-${k}"><span class="te">${p.emoji}</span><span class="tt"><span class="tn">${p.name}</span> <span class="rank">${'★'.repeat(r)}${'☆'.repeat(3-r)}</span><br><span class="ts">${r?`+${r*8}% HP / ATK / DEF`:'Untrained'}</span></span>${r>=3 ? '<span class="chip">MAX</span>' : `<button class="btn${have>=cost?' mint':' ghost'}" data-k="${k}">Train · 🍪${cost}</button>`}</div>`;
+  }).join('');
+  $$('#train-list .btn').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.k, r = save.train[k]||0, cost = TRAIN_COST[r];
+    if ((save.treats||0) < cost) { toast(`You need 🍪 ${cost-(save.treats||0)} more treats.`); return; }
+    save.treats -= cost; save.train[k] = r+1; persist(); Snd.play('heal');
+    renderTrain(); renderMap();
+    const row = $('#tr-'+k); row.animate([{transform:'scale(1.06)',background:'#fff3c4'},{transform:'none',background:'#fff'}], { duration:600 });
+    toast(`${petDef(k).name} reached rank ${r+1}!`);
+  }));
+}
+
+let teamStage = 0, teamSel = [];
+function openTeam(i){
+  teamStage = i;
+  const st = STAGES[i];
+  $('#tm-num').textContent = `Stage ${i+1}${st.enemies.some(k=>ENEMIES[k].boss)?' · Boss battle':''}`;
+  $('#tm-name').textContent = `${st.icon} ${st.name}`;
+  $('#tm-foes').innerHTML = st.enemies.map(k => { const e = ENEMIES[k]; return `<span class="foe" title="${save.caught.includes(k)?'Already your friend':'Can be befriended after you win'}"><b>${e.emoji}</b>${e.name} ${TYPES[e.type].icon} ${save.caught.includes(k)?'✓':'💖'}</span>`; }).join('');
+  const foeTypes = [...new Set(st.enemies.map(k => ENEMIES[k].type))];
+  const tips = foeTypes.map(t => { const good = Object.keys(STRONG).filter(a => STRONG[a]===t); return `${good.map(g=>TYPES[g].icon+' '+TYPES[g].name).join(' & ')} beat ${TYPES[t].icon} ${TYPES[t].name}`; });
+  const canBefriend = [...new Set(st.enemies)].filter(k => !save.caught.includes(k)).length;
+  $('#tm-tip').innerHTML = `💡 ${st.blurb}<br>Tip: ${tips.join(' · ')}.${canBefriend ? `<br>💖 Win to try befriending one of these wild pets!` : ''}`;
+  const open = allPetKeys().filter(petOpen);
+  if (DEMO) teamSel = ['ember','bubble','leaf'];
+  else if (!teamSel.length || teamSel.some(k => !petOpen(k))) teamSel = open.slice(0,3);
+  renderTeamPets();
+  $('#team').hidden = false;
+}
+function renderTeamPets(){
+  const lv = 1 + cleared()*2;
+  $('#tm-pets').innerHTML = allPetKeys().map(k => [k, petDef(k)]).map(([k,p]) => {
+    if (!petOpen(k)) return `<div class="pcard lock"><span class="pe">${p.emoji}</span><span class="pn">???</span><span class="pr">Unlocks after Stage ${p.unlock+1}</span></div>`;
+    return `<button class="pcard${teamSel.includes(k)?' sel':''}" data-k="${k}" aria-pressed="${teamSel.includes(k)}">
+      <span class="pe">${p.emoji}</span><span class="pn">${p.name}</span>
+      <span class="type-pill" style="background:${TYPES[p.type].color}">${TYPES[p.type].icon} ${TYPES[p.type].name}</span>
+      <span class="pr">${p.role} · Lv${lv} <span class="rank">${'★'.repeat(save.train[k]||0)}</span></span>
+      <span class="ps">❤️${p.hp} ⚔️${p.atk} 💨${p.spd}</span></button>`;
+  }).join('');
+  $$('#tm-pets .pcard[data-k]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.k;
+    if (teamSel.includes(k)) teamSel = teamSel.filter(x => x!==k);
+    else if (teamSel.length < 3) teamSel.push(k);
+    else { toast('Your team is full (3 pets). Tap a pet to remove it first.'); return; }
+    Snd.play('tap'); renderTeamPets();
+  }));
+  $('#tm-count').textContent = `${teamSel.length}/3`;
+  $('#btn-fight').disabled = teamSel.length===0;
+}
+$('#tm-close').addEventListener('click', () => $('#team').hidden = true);
+$('#btn-fight').addEventListener('click', () => {
+  if (!teamSel.length) return;
+  $('#team').hidden = true; Snd.play('start');
+  startBattle(teamStage, [...teamSel]);
+});
+
+/* =========================================================
+   BATTLE SETUP
+   ========================================================= */
+let uidSeq = 0;
+function makeUnit(def, key, side, lvl, lvLabel, tr=1){
+  const k = l => 1 + (lvl-1)*l;
+  const u = {
+    uid: ++uidSeq, key, side, name:def.name, emoji:def.emoji, type:def.type, boss:!!def.boss, ability:def.ability,
+    moves:def.moves, maxHp: Math.round(def.hp*lvl*tr), atk: def.atk*k(.6)*tr, def: def.def*k(.5)*tr, spd:def.spd,
+    lvLabel, status:[], shield:0, energy:0, alive:true, dmgDealt:0,
+    guardMax: side==='enemy' ? (def.boss ? 140 : 60) : 0,
+    weak: Object.keys(STRONG).filter(a => STRONG[a]===def.type),
+    charging:false, intent:null,
+  };
+  u.hp = u.maxHp; u.guard = u.guardMax; u.hasUlt = def.moves.some(m => m.slot==='ult');
+  return u;
+}
+
+/* ---------- enemy plans (shown in a bubble above each wild pet) ---------- */
+function planIntent(u){
+  if (u.charging) return;
+  const ult = u.moves.find(m => m.slot==='ult'), skill = u.moves.find(m => m.slot==='skill'), basic = u.moves.find(m => m.slot==='basic');
+  if (ult && u.energy>=100) { u.intent = 'CHARGE'; return; }
+  let m = null;
+  if (skill) {
+    if (skill.heal) { if (validTargets(u, skill.target, skill).some(x => x.alive && x.hp/x.maxHp < .6) && Math.random()<.65) m = skill; }
+    else if (Math.random() < (skill.power ? .4 : .35)) m = skill;
+  }
+  u.intent = m || basic;
+}
+function intentInfo(u){
+  const ult = u.moves.find(m => m.slot==='ult');
+  if (u.charging) return { i:'⚠️', t:ult.name+'!', cls:'danger' };
+  if (u.intent==='CHARGE') return { i:'🔋', t:'Charging…', cls:'warn' };
+  const m = u.intent; if (!m) return null;
+  if (m.power && m.target==='enemies') return { i:'🌀', t:'Hit all', cls:'warn' };
+  if (m.power) return { i:'⚔️', t:'Attack' };
+  if (m.heal) return { i:'💚', t:'Heal' };
+  if (m.status) return { i:STATUS[m.status.id].icon, t:STATUS[m.status.id].name };
+  return { i:'✨', t:'Power up' };
+}
+const foesOf = u => u.side==='player' ? B.enemies : B.players;
+const friendsOf = u => u.side==='player' ? B.players : B.enemies;
+const alive = list => list.filter(u => u.alive);
+const hasS = (u,id) => u.status.some(s => s.id===id);
+const effSpd = u => u.spd * (hasS(u,'slow') ? .7 : 1);
+
+function startBattle(stageIdx, teamKeys, opts={}){
+  const st = STAGES[stageIdx];
+  const plv = 1 + cleared()*0.12;
+  B = { stage:st, idx:stageIdx, round:0, paws:3, items:ITEMS.map(i => ({...i})), demo:DEMO, demoTurn:0, flags:{},
+        stats:{ maxHit:0, itemsUsed:0, fainted:0, breaks:0, combos:0 }, treats:0, resolveAction:null, targeting:null, cur:null, queue:[], qpos:0 };
+  B.players = teamKeys.map(k => makeUnit(petDef(k), k, 'player', plv, 1+cleared()*2, 1 + .08*(save.train[k]||0)));
+  B.enemies = st.enemies.map(k => makeUnit(ENEMIES[k], k, 'enemy', st.lvl, stageIdx*2+1));
+  if (DEMO) { B.players.forEach(u => u.energy = 60); B.enemies.forEach(u => { u.maxHp = Math.round(u.maxHp*.8); u.hp = u.maxHp; }); }
+  B.enemies.forEach(planIntent);
+  setPaused(false); $('#pause').hidden = true; $('#bag').hidden = true;
+  renderBattle(); setBg(st); showScreen('battle');
+  runBattle().catch(e => { if (e!==ABORT) console.error(e); });
+}
+
+function renderBattle(){
+  const er = $('#enemy-row'), pr = $('#player-row');
+  er.innerHTML = ''; pr.innerHTML = '';
+  B.enemies.forEach(u => er.append(buildUnit(u)));
+  B.players.forEach(u => pr.append(buildUnit(u)));
+  renderPaws(); setPanel('wait', '⏳', 'Get ready…'); $('#cur').innerHTML = '';
+  $('#b-round').textContent = 'R1'; $('#queue').innerHTML = '';
+  $('#b-speed').textContent = SPEED===1 ? '1×' : '2×';
+  $('#b-treats').textContent = '🍪 0';
+  logMsg(`Wild pets appeared in ${B.stage.name}!`);
+}
+function buildUnit(u){
+  const el = document.createElement('div');
+  el.className = `unit ${u.side}${u.boss?' boss':''} enter`;
+  const guardRow = u.side==='enemy' ? `<div class="u-guardrow" title="Guard: hit it with ${u.weak.map(w=>TYPES[w].name).join(' or ')} moves to Break it"><span>🛡️</span><span class="u-guard"><i></i></span><span class="u-wk">${u.weak.map(w=>TYPES[w].icon).join('')}</span></div>` : '';
+  el.innerHTML = `<div class="u-status"></div>${u.side==='enemy'?'<div class="u-intent" hidden></div>':''}
+    <div class="u-sprite"><span class="u-emoji">${u.emoji}</span></div><div class="u-shadow"></div>
+    <div class="u-plate"><div class="u-name"><span class="u-type" style="background:${TYPES[u.type].color}">${TYPES[u.type].icon}</span><span class="u-nm">${u.name}</span><span class="u-lv">Lv${u.lvLabel}</span></div>
+      <div class="u-hp"><i class="u-hp-lag"></i><i class="u-hp-fill"></i><i class="u-shield"></i></div>
+      <div class="u-meta"><span class="u-hpnum"></span>${u.hasUlt?'<span class="u-en" title="Ultimate energy"><i></i></span>':''}</div>${guardRow}</div>`;
+  el.style.animationDelay = '0s';
+  el.querySelector('.u-sprite').style.animationDelay = (Math.random()*.3)+'s';
+  el.querySelector('.u-emoji').style.animationDelay = -Math.random()*2+'s';
+  el.addEventListener('click', () => onUnitTap(u));
+  el.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); onUnitTap(u); } });
+  u.el = el; u.spr = el.querySelector('.u-sprite');
+  setTimeout(() => el.classList.remove('enter'), 900);
+  renderUnit(u);
+  return el;
+}
+function renderUnit(u){
+  const el = u.el; if (!el) return;
+  const r = u.hp/u.maxHp, f = el.querySelector('.u-hp-fill');
+  f.style.width = pct(r); el.querySelector('.u-hp-lag').style.width = pct(r);
+  f.classList.toggle('mid', r<.55 && r>=.28); f.classList.toggle('low', r<.28);
+  el.querySelector('.u-shield').style.width = pct(Math.min(1, u.shield/u.maxHp));
+  el.querySelector('.u-hpnum').textContent = `${Math.ceil(u.hp)}/${u.maxHp}`;
+  const en = el.querySelector('.u-en i'); if (en) en.style.width = pct(u.energy/100);
+  el.querySelector('.u-status').innerHTML = u.status.map(s => `<span title="${STATUS[s.id].name}: ${STATUS[s.id].desc}">${STATUS[s.id].icon}${s.turns}</span>`).join('') + (u.shield>0 ? `<span title="Shield">🛡️${Math.ceil(u.shield)}</span>`:'');
+  el.classList.toggle('ko', !u.alive);
+  el.classList.toggle('ult-ready', u.alive && u.hasUlt && u.energy>=100);
+  const g = el.querySelector('.u-guard i'); if (g) g.style.width = pct(u.guard/u.guardMax);
+  el.classList.toggle('broken', u.alive && hasS(u,'broken'));
+  el.classList.toggle('charging', u.alive && u.charging);
+  const it = el.querySelector('.u-intent');
+  if (it) {
+    const info = u.alive && !hasS(u,'broken') ? intentInfo(u) : null;
+    it.hidden = !info;
+    if (info) { it.className = 'u-intent ' + (info.cls||''); it.textContent = `${info.i} ${info.t}`; it.title = 'What this pet plans to do on its next turn'; }
+  }
+}
+function renderPaws(){ $('#paws').innerHTML = [0,1,2,3,4].map(i => `<span class="${i<B.paws?'on':''}">🐾</span>`).join(''); $('#paws').title = `Paw Points: ${B.paws}/5`; }
+function addPaws(n){ B.paws = Math.max(0, Math.min(5, B.paws+n)); renderPaws(); }
+function gainEnergy(u, n){
+  if (!u.hasUlt || !u.alive) return;
+  if (u.ability?.id==='zoomies') n *= 1.5;
+  u.energy = Math.min(100, u.energy+n);
+  if (u.side==='enemy' && u.energy>=100 && !u.charging) u.intent = 'CHARGE';
+  renderUnit(u);
+}
+function logMsg(t){ const l = $('#log'); l.textContent = t; l.classList.remove('pop'); void l.offsetWidth; l.classList.add('pop'); }
+function renderQueue(){
+  const q = $('#queue'); const rest = B.queue.slice(B.qpos).filter(u => u.alive);
+  const nextRound = [...alive(B.players), ...alive(B.enemies)].sort((a,c) => effSpd(c)-effSpd(a));
+  q.innerHTML = rest.map((u,i) => `<span class="q ${u.side}${i===0?' now':''}" title="${u.name}">${u.emoji}</span>`).join('')
+    + `<span class="q-sep">R${B.round+1}</span>` + nextRound.map(u => `<span class="q ${u.side}" style="opacity:.5">${u.emoji}</span>`).join('');
+}
+
+/* =========================================================
+   BATTLE LOOP
+   ========================================================= */
+async function runBattle(){
+  const b = B;
+  await wait(500);
+  await showBanner(`<small>Stage ${b.idx+1} · ${b.stage.name}</small>BATTLE START!`, 1300);
+  if (b.demo) {
+    await narrate('Your team is at the bottom. The wild pets are at the top!', 2800);
+    await narrate('The bar at the top shows who moves next. Faster pets go first.', 3000, 'top');
+    await narrate('The bubble over each wild pet shows its NEXT move (⚔️ attack, 🌀 hit all…). Plan ahead!', 3200);
+  }
+  while (true) {
+    b.round++;
+    $('#b-round').textContent = 'R'+b.round;
+    b.queue = [...alive(b.players), ...alive(b.enemies)].sort((a,c) => effSpd(c)-effSpd(a) || Math.random()-.5);
+    for (b.qpos=0; b.qpos<b.queue.length; b.qpos++) {
+      const u = b.queue[b.qpos];
+      if (!u.alive) continue;
+      renderQueue();
+      await takeTurn(u);
+      const res = !alive(b.enemies).length ? 'win' : !alive(b.players).length ? 'lose' : null;
+      if (res) { await finish(res); return; }
+    }
+  }
+}
+
+async function takeTurn(u){
+  B.cur = u; u.el.classList.add('active');
+  const skipped = await startOfTurn(u);
+  if (u.alive && !skipped) {
+    let act;
+    if (u.side==='player') act = await getPlayerAction(u);
+    else {
+      if (B.demo && !B.flags.enemyTurn) { B.flags.enemyTurn = 1; await narrate('Now the wild pets take their turn and attack back!', 2400); }
+      setPanel('wait', u.emoji, `${u.name} is thinking…`); $('#cur').innerHTML = `<span class="ce">${u.emoji}</span><span class="ct">Wild ${u.name}'s turn</span>`;
+      await wait(650);
+      const ult = u.moves.find(m => m.slot==='ult');
+      if (u.charging) {
+        u.charging = false;
+        act = { kind:'move', move:ult, targets:validTargets(u, ult.target, ult) };
+      } else if (ult && u.energy>=100) {
+        // bosses wind up their Ultimate for one turn: a chance to Break them first!
+        u.charging = true; renderUnit(u);
+        logMsg(`⚠️ ${u.name} is charging ${ult.name}! Break its Guard to stop it!`);
+        floatText(u, 'Charging!', 'tag bad', -40); Snd.play('charge'); burst(u, ['⚡','✨',TYPES[u.type].icon], 10, true);
+        await wait(1000);
+        act = null;
+      } else act = enemyAI(u);
+    }
+    if (act) await perform(u, act);
+    if (B.demo && B.pendingNarr) { const n = B.pendingNarr; B.pendingNarr = null; await narrate(n, 3000); }
+  }
+  u.status.forEach(s => s.turns--); u.status = u.status.filter(s => s.turns>0);
+  if (u.side==='enemy' && u.alive) planIntent(u);
+  renderUnit(u); u.el.classList.remove('active'); B.cur = null;
+  await wait(280);
+}
+
+async function startOfTurn(u){
+  if (u.ability?.id==='sunbathe' && u.hp<u.maxHp) { healUnit(u, u.maxHp*.06, true); await wait(350); }
+  if (hasS(u,'burn')) {
+    const d = Math.max(1, Math.round(u.maxHp*.07));
+    logMsg(`${u.name} is hurt by its burn!`); burst(u, ['🔥'], 6);
+    applyDamage(u, d); floatText(u, '-'+d, ''); Snd.play('hit');
+    await wait(600);
+    if (!u.alive) { await koUnit(u); return true; }
+  }
+  if (hasS(u,'broken')) {
+    logMsg(`${u.name} is dizzy from the Break! 💫`); burst(u, ['💫','⭐'], 6); shakeEl(u.spr);
+    await wait(900);
+    u.guard = u.guardMax; renderUnit(u); floatText(u, '🛡️ Guard back', 'tag', -40);
+    return true;
+  }
+  if (hasS(u,'freeze')) { logMsg(`${u.name} is frozen solid! 🧊`); burst(u, ['🧊','❄️'], 8); shakeEl(u.spr); await wait(900); return true; }
+  if (hasS(u,'sleep')) { logMsg(`${u.name} is fast asleep… 💤`); floatText(u,'Zzz…','tag'); await wait(900); return true; }
+  if (hasS(u,'para') && Math.random()<.5) { logMsg(`${u.name} is paralyzed! It can't move!`); burst(u, ['⚡'], 6); shakeEl(u.spr); await wait(900); return true; }
+  return false;
+}
+
+/* ---------- player input ---------- */
+function setPanel(mode, emoji, text){
+  $('#p-choose').hidden = mode!=='choose';
+  $('#p-target').hidden = mode!=='target';
+  $('#p-wait').hidden = mode!=='wait';
+  if (mode==='wait') { $('#w-emoji').textContent = emoji||''; $('#w-text').textContent = text||''; }
+  if (mode==='target') $('#t-hint').textContent = text;
+}
+function moveBtn(el, u, m){
+  const tag = m.slot==='basic' ? 'Basic · +1 🐾' : m.slot==='skill' ? 'Skill · costs 1 🐾' : (u.energy>=100 ? 'Ultimate · READY!' : `Ultimate · ${Math.floor(u.energy)}%`);
+  el.innerHTML = `<span class="a-tag">${tag}</span><span class="a-name">${TYPES[m.type].icon} ${m.name}</span><span class="a-desc">${m.desc}</span>`;
+  el.classList.toggle('off', (m.slot==='skill' && B.paws<1) || (m.slot==='ult' && u.energy<100));
+  if (m.slot==='ult') { el.style.setProperty('--p', pct(u.energy/100)); el.classList.toggle('ready', u.energy>=100); }
+  el.setAttribute('aria-label', `${m.name}. ${tag}. ${m.desc}`);
+}
+function showActions(u){
+  $('#cur').innerHTML = `<span class="ce">${u.emoji}</span><span class="ct"><b>${u.name}</b>'s turn!</span>`;
+  const m = s => u.moves.find(x => x.slot===s);
+  moveBtn($('#act-basic'), u, m('basic')); moveBtn($('#act-skill'), u, m('skill')); moveBtn($('#act-ult'), u, m('ult'));
+  const left = B.items.reduce((a,i)=>a+i.count,0);
+  $('#bag-sum').textContent = left ? `${left} items: potions, power-ups & more` : 'Empty!';
+  $('#act-bag').classList.toggle('off', !left);
+  setPanel('choose');
+}
+function getPlayerAction(u){
+  return new Promise(res => {
+    B.resolveAction = res; showActions(u);
+    if (B.demo) demoChoose(u).catch(e => { if (e!==ABORT) console.error(e); });
+  });
+}
+function resolveAct(a){ const r = B.resolveAction; if (!r) return; B.resolveAction = null; clearTargeting(); $('#bag').hidden = true; setPanel('wait', B.cur?.emoji, ''); r(a); }
+
+function validTargets(u, kind, src){
+  if (kind==='enemy' || kind==='enemies') return alive(foesOf(u));
+  if (kind==='ally') return alive(friendsOf(u));
+  if (kind==='allies') return src?.revive ? friendsOf(u) : alive(friendsOf(u));
+  if (kind==='self') return [u];
+  if (kind==='ko') return friendsOf(u).filter(x => !x.alive);
+  return [];
+}
+function onPick(slot){
+  if (!B || !B.resolveAction) return;
+  const u = B.cur, m = u.moves.find(x => x.slot===slot);
+  if (slot==='skill' && B.paws<1) { toast('No Paw Points left! Basic attacks earn 🐾.'); return; }
+  if (slot==='ult' && u.energy<100) { toast(`Ultimate is charging (${Math.floor(u.energy)}%). Attack to fill it!`); return; }
+  Snd.play('tap');
+  const opts = validTargets(u, m.target, m);
+  if (m.target==='enemy' || m.target==='ally') startTargeting(opts, m.target==='ally', t => resolveAct({ kind:'move', move:m, targets:[t] }), m.target==='enemy' ? `Tap a wild pet to use ${m.name}` : `Tap a teammate to use ${m.name}`);
+  else resolveAct({ kind:'move', move:m, targets:opts });
+}
+$('#act-basic').addEventListener('click', () => onPick('basic'));
+$('#act-skill').addEventListener('click', () => onPick('skill'));
+$('#act-ult').addEventListener('click', () => onPick('ult'));
+$('#act-bag').addEventListener('click', () => {
+  if (!B || !B.resolveAction) return;
+  if (!B.items.some(i => i.count)) { toast('Your bag is empty.'); return; }
+  Snd.play('tap'); renderBag(); $('#bag').hidden = false;
+});
+$('#bag-close').addEventListener('click', () => $('#bag').hidden = true);
+function renderBag(){
+  $('#bag-list').innerHTML = B.items.map(it => `<button class="item${it.count?'':' empty'}" data-id="${it.id}" id="item-${it.id}"><span class="ii">${it.icon}</span><span class="it"><span class="in">${it.name}</span><br><span class="id">${it.desc}</span></span><span class="ic">×${it.count}</span></button>`).join('');
+  $$('#bag-list .item').forEach(b => b.addEventListener('click', () => onItem(b.dataset.id)));
+}
+function onItem(id){
+  const it = B.items.find(i => i.id===id), u = B.cur;
+  if (!it.count) { toast(`You're out of ${it.name}.`); return; }
+  const opts = validTargets(u, it.target, it);
+  if (!opts.length) { toast(it.target==='ko' ? 'No fainted pets to revive.' : 'No one can use that.'); return; }
+  Snd.play('tap'); $('#bag').hidden = true;
+  if (it.target==='allies') resolveAct({ kind:'item', item:it, targets:opts });
+  else startTargeting(opts, true, t => resolveAct({ kind:'item', item:it, targets:[t] }), it.target==='ko' ? `Tap a fainted pet to revive it` : `Tap a teammate to use ${it.name}`);
+}
+function startTargeting(list, ally, cb, hint){
+  B.targeting = { list, cb };
+  list.forEach(t => { t.el.classList.add('targetable'); t.el.classList.toggle('ally-t', ally); t.el.tabIndex = 0; });
+  setPanel('target', '', hint);
+}
+function clearTargeting(){
+  if (!B) return;
+  $$('.unit.targetable').forEach(el => { el.classList.remove('targetable','ally-t'); el.removeAttribute('tabindex'); });
+  B.targeting = null;
+}
+function onUnitTap(u){
+  if (!B || !B.targeting || !B.targeting.list.includes(u)) return;
+  const cb = B.targeting.cb; clearTargeting(); Snd.play('tap'); cb(u);
+}
+$('#t-cancel').addEventListener('click', () => { clearTargeting(); if (B && B.cur) showActions(B.cur); });
+
+/* ---------- enemy brain ---------- */
+function enemyAI(u){
+  const basic = u.moves.find(m => m.slot==='basic');
+  // enemies do what their bubble promised
+  let m = (u.intent && u.intent!=='CHARGE') ? u.intent : basic;
+  if (m.heal && !validTargets(u, m.target, m).some(x => x.alive && x.hp/x.maxHp < .9)) m = basic;
+  let targets = validTargets(u, m.target, m);
+  if (m.target==='enemy') {
+    const low = [...targets].sort((a,c) => a.hp/a.maxHp - c.hp/c.maxHp)[0];
+    targets = [Math.random()<.35 ? low : pick(targets)];
+  } else if (m.target==='ally') targets = [[...targets].sort((a,c) => a.hp/a.maxHp - c.hp/c.maxHp)[0]];
+  return { kind:'move', move:m, targets };
+}
+
+/* ---------- doing things ---------- */
+async function perform(u, act){
+  if (act.kind==='item') return useItem(u, act.item, act.targets);
+  const m = act.move;
+  if (u.side==='player') { if (m.slot==='basic') addPaws(1); if (m.slot==='skill') addPaws(-1); }
+  if (m.slot==='ult') { u.energy = 0; renderUnit(u); }
+  logMsg(`${u.side==='enemy'?'Wild ':''}${u.name} used ${m.name}!`);
+  floatText(u, m.name, 'tag good', -60);
+  if (m.slot==='ult') await ultCutscene(u, m);
+  else await wait(350);
+
+  const targets = act.targets;
+  if (m.power) {
+    const anim = m.anim;
+    if (anim==='dash' || anim==='pounce') {
+      await bodyMove(u, targets[0], anim);
+      await Promise.all(targets.map((t,i) => hitTarget(u, t, m, i*80, 'none')));
+    } else {
+      await lunge(u, targets[0]);
+      if (anim==='wave') sweepWave(targets, m);
+      await Promise.all(targets.map((t,i) => hitTarget(u, t, m, anim==='wave' ? 0 : i*110, anim)));
+    }
+  } else if (m.status && (m.target==='enemy'||m.target==='enemies')) {
+    await lunge(u, targets[0]);
+    for (const t of targets) {
+      await projectile(u, t, STATUS[m.status.id].icon, 34);
+      if (Math.random() < m.status.chance) applyStatus(t, m.status); else { floatText(t,'Missed!','miss'); Snd.play('miss'); }
+    }
+  }
+  if (m.heal || m.revive || m.shield || m.buff || m.cleanse) {
+    hop(u);
+    for (const t of targets) {
+      if (!t.alive && m.revive) reviveUnit(t, m.revive);
+      else if (t.alive) {
+        if (m.heal) healUnit(t, t.maxHp*m.heal);
+        if (m.cleanse) { const had = t.status.some(s => STATUS[s.id].bad); t.status = t.status.filter(s => !STATUS[s.id].bad); if (had) floatText(t,'Cured!','tag good',-30); renderUnit(t); }
+        if (m.shield) addShield(t, t.maxHp*m.shield);
+        if (m.buff) applyStatus(t, m.buff);
+      }
+      await wait(140);
+    }
+  }
+  gainEnergy(u, m.slot==='basic' ? 22 : m.slot==='skill' ? 30 : 0);
+  await wait(500);
+}
+
+async function hitTarget(u, t, m, delay, anim='projectile'){
+  if (delay) await wait(delay);
+  await deliver(anim, u, t, m);
+  if (!t.alive) return;
+  if (t.ability?.id==='dodge' && Math.random()<.15) { floatText(t,'Dodged!','miss'); Snd.play('miss'); dodge(t); return; }
+  const e = eff(m.type, t.type), crit = Math.random()<.12;
+  // element combos: a move reacts with a status already on the target
+  let react = null, mult = 1;
+  if (m.type==='water' && hasS(t,'burn')) { react = '💨 STEAM!'; mult = 1.5; t.status = t.status.filter(s => s.id!=='burn'); }
+  else if (m.type==='spark' && hasS(t,'slow')) { react = '⚡ OVERLOAD!'; mult = 1.4; }
+  else if (m.type==='leaf' && hasS(t,'para')) { react = '🌸 BLOOM!'; mult = 1.25; }
+  let atk = u.atk * (hasS(u,'atkUp')?1.4:1) * (hasS(u,'atkDown')?.7:1) * (u.ability?.id==='blaze' && u.hp/u.maxHp<.4 ? 1.4 : 1);
+  let dmg = m.power * atk / t.def * 1.6 * e * mult * (crit?1.6:1) * (hasS(t,'broken')?1.25:1) * rand(.9,1.1);
+  if (t.ability?.id==='softfur') dmg *= .85;
+  dmg = Math.max(1, Math.round(dmg));
+  const { absorbed } = applyDamage(t, dmg);
+  u.dmgDealt += dmg; if (u.side==='player') B.stats.maxHit = Math.max(B.stats.maxHit, dmg);
+  // juicy feedback: impact flash ring + particles + squash
+  impactRing(t, TYPES[m.type].color, crit || !!react || m.slot==='ult');
+  burst(t, [TYPES[m.type].icon, '✨', '💥'], crit||m.slot==='ult' ? 12 : 8);
+  shakeEl(t.spr); flashUnit(t);
+  if (react) {
+    floatText(t, react, 'tag combo', -104); burst(t, [react.split(' ')[0], '✨'], 10); Snd.play('combo');
+    if (u.side==='player') B.stats.combos++;
+    if (B.demo && !B.flags.combo) { B.flags.combo = 1; B.pendingNarr = `${react} That's an element COMBO: some types react with status effects for bonus damage. See the manual!`; }
+  }
+  if (absorbed) floatText(t, `🛡️-${absorbed}`, 'shield', -24);
+  floatText(t, (crit?'💥':'')+dmg, crit?'crit':'');
+  Snd.play(crit ? 'crit' : 'hit');
+  if (crit || m.slot==='ult') screenShake(crit?10:7);
+  if (crit) floatText(t, 'CRITICAL!', 'tag good', -50);
+  if (e>1) { floatText(t, 'Super effective!', 'tag good', -78); if (B.demo && !B.flags.eff) { B.flags.eff = 1; B.pendingNarr = `${TYPES[m.type].icon} ${TYPES[m.type].name} beats ${TYPES[t.type].icon} ${TYPES[t.type].name}! Super effective hits do 1.5× damage.`; } }
+  if (e<1) floatText(t, 'Not very effective…', 'tag bad', -78);
+  gainEnergy(t, 10);
+  if (!t.alive) { await koUnit(t); gainEnergy(u, 10); return; }
+  // Guard: weakness hits chip it fast; at 0 the foe is BROKEN
+  if (t.guardMax && !hasS(t,'broken')) {
+    t.guard = Math.max(0, t.guard - GUARD_HIT[t.weak.includes(m.type) ? 'weak' : 'other'][m.slot]);
+    renderUnit(t);
+    if (t.guard<=0) { await breakUnit(t, u); if (!t.alive) { gainEnergy(u, 10); return; } }
+  }
+  if (react==='⚡ OVERLOAD!') applyStatus(t, { id:'para', chance:1, turns:1 });
+  if (react==='🌸 BLOOM!') alive(friendsOf(u)).forEach(f => healUnit(f, f.maxHp*.08, true));
+  if (m.status && Math.random() < m.status.chance) { await wait(250); applyStatus(t, m.status); }
+}
+
+async function breakUnit(t, u){
+  t.guard = 0;
+  t.status = t.status.filter(s => s.id!=='broken'); t.status.push({ id:'broken', turns:1 });
+  if (t.charging) { t.charging = false; t.energy = 30; floatText(t, 'Charge canceled!', 'tag good', -124); }
+  shards(t); impactRing(t, '#9fb3ff', true); flash('#e6ecff', .65); screenShake(9); Snd.play('break');
+  floatText(t, 'BREAK!', 'crit', -74);
+  const bd = Math.round(t.maxHp*.08); applyDamage(t, bd); floatText(t, '-'+bd, '', 12);
+  u.dmgDealt += bd;
+  logMsg(`💥 ${t.name}'s Guard broke! It's dizzy!`);
+  if (u.side==='player') B.stats.breaks++;
+  if (B.demo && !B.flags.brk) { B.flags.brk = 1; B.pendingNarr = 'BREAK! Hitting a weak type (icons next to 🛡️) cracks the Guard. A broken foe skips its turn and takes +25% damage.'; }
+  renderUnit(t);
+  await wait(450);
+  if (!t.alive) await koUnit(t);
+}
+
+function applyDamage(t, dmg){
+  let absorbed = 0;
+  if (t.shield>0) { absorbed = Math.min(Math.round(t.shield), dmg); t.shield -= absorbed; dmg -= absorbed; }
+  t.hp = Math.max(0, t.hp - dmg);
+  if (t.hp<=0) t.alive = false;
+  renderUnit(t);
+  return { absorbed };
+}
+function healUnit(t, amt, quiet){
+  amt = Math.round(Math.min(amt, t.maxHp - t.hp));
+  t.hp += amt; renderUnit(t);
+  floatText(t, '+'+amt, 'heal', quiet ? 0 : -10);
+  burst(t, ['💚','✨','🌸'], quiet ? 3 : 7, true);
+  if (!quiet) Snd.play('heal');
+}
+function addShield(t, amt){ t.shield = Math.min(t.maxHp*.6, t.shield + amt); renderUnit(t); floatText(t, '🛡️ Shield', 'shield'); burst(t,['🫧','💠'],6,true); Snd.play('buff'); }
+function applyStatus(t, s){
+  if (!t.alive) return;
+  if (s.id==='burn' && t.ability?.id==='blubber') { floatText(t,'Immune!','miss',-40); return; }
+  if ((t.boss || t.ability?.id==='boss') && ['freeze','sleep','para'].includes(s.id)) { floatText(t,'Immune!','miss',-40); return; }
+  const info = STATUS[s.id], ex = t.status.find(x => x.id===s.id);
+  if (ex) ex.turns = Math.max(ex.turns, s.turns); else t.status.push({ id:s.id, turns:s.turns });
+  floatText(t, `${info.icon} ${info.name}`, `tag ${info.bad?'bad':'good'}`, -40);
+  Snd.play(info.bad ? 'status' : 'buff');
+  if (!info.bad) burst(t, ['💪','✨'], 5, true);
+  renderUnit(t);
+  if (B.demo && info.bad && !B.flags.status) { B.flags.status = 1; B.pendingNarr = `Status effects like ${info.icon} ${info.name} show above a pet's head. Check the manual for what each one does!`; }
+}
+async function koUnit(t){
+  t.status = []; t.shield = 0; t.energy = 0; t.charging = false;
+  const last = t.side==='enemy' && !alive(B.enemies).length;
+  if (last) {
+    // finishing blow: freeze-frame zoom + white-out
+    flash('#fff', 1); screenShake(14); Snd.play('crit');
+    $('#arena').animate([{transform:'scale(1)'},{transform:'scale(1.08)',offset:.3},{transform:'scale(1)'}], { duration:900, easing:'ease-out' });
+    floatText(t, 'FINISH!', 'crit', -96);
+    impactRing(t, '#ffc531', true);
+    await wait(650);
+  }
+  logMsg(`${t.side==='enemy'?'Wild ':''}${t.name} fainted!`);
+  if (t.side==='enemy') dropTreats(t, t.boss ? 30 : 6);
+  Snd.play('ko'); burst(t, ['💫','⭐'], 8);
+  t.spr.animate([{transform:'none'},{transform:'translateY(-20px) rotate(-20deg)'},{transform:'translateY(10px) rotate(90deg) scale(.8)',opacity:.6}], { duration:600*SPEED, easing:'ease-in' });
+  if (t.side==='player') B.stats.fainted++;
+  await wait(500); renderUnit(t);
+  if (B.demo && !B.flags.ko && t.side==='enemy') { B.flags.ko = 1; B.pendingNarr = 'Knock out EVERY wild pet to win the stage!'; }
+}
+function reviveUnit(t, frac){
+  t.alive = true; t.hp = Math.round(t.maxHp*frac); renderUnit(t);
+  floatText(t, 'Revived!', 'tag good', -40); burst(t, ['🪶','✨','💖'], 10, true); Snd.play('heal');
+  t.spr.animate([{transform:'scale(.2)'},{transform:'scale(1.2)'},{transform:'none'}], { duration:500 });
+}
+
+async function useItem(u, it, targets){
+  it.count--; B.stats.itemsUsed++;
+  logMsg(`${u.name} used ${it.icon} ${it.name}!`);
+  for (const t of targets) {
+    await projectile(u, t, it.icon, 44, true);
+    if (it.revive) reviveUnit(t, it.revive);
+    if (it.heal) healUnit(t, t.maxHp*it.heal);
+    if (it.buff) applyStatus(t, it.buff);
+    if (it.shield) addShield(t, t.maxHp*it.shield);
+    if (it.energy) { t.energy = 0; gainEnergy(t, 100); t.energy = 100; renderUnit(t); floatText(t,'⚡ Ultimate ready!','tag good',-40); burst(t,['🍬','⚡','✨'],8,true); Snd.play('buff'); }
+  }
+  await wait(700);
+}
+
+/* ---------- win / lose ---------- */
+async function finish(res){
+  const b = B; renderQueue();
+  setPanel('wait', res==='win'?'🎉':'💤', res==='win'?'You won!':'Your team fainted…'); $('#cur').innerHTML = '';
+  await wait(500);
+  if (res==='win') {
+    Snd.play('win'); confetti();
+    alive(b.players).forEach((u,i) => setTimeout(() => hop(u, 3), i*120));
+    await showBanner('<small>All wild pets fainted</small>VICTORY!', 1800);
+  } else {
+    Snd.play('lose');
+    await showBanner('<small>Your team needs a nap</small>Oh no…', 1800);
+  }
+  const win = res==='win';
+  const goals = [
+    { t:'Win the battle', ok:win },
+    { t:'No pet fainted', ok:win && b.stats.fainted===0 },
+    { t:`Win within ${b.stage.par} rounds`, ok:win && b.round<=b.stage.par },
+  ];
+  const stars = goals.filter(g => g.ok).length;
+  const before = Object.keys(PETS).filter(petOpen);
+  let firstClear = false;
+  if (win && !b.demo) { firstClear = save.stars[b.idx]==null; save.stars[b.idx] = Math.max(save.stars[b.idx]||0, stars); persist(); }
+  const unlocked = Object.keys(PETS).filter(petOpen).filter(k => !before.includes(k));
+  const all = [...b.players], mvp = all.sort((a,c) => c.dmgDealt-a.dmgDealt)[0];
+  const collected = b.treats, bonus = win ? stars*5 + (firstClear ? 15 : 0) : 0;
+  if (!b.demo) { save.treats = (save.treats||0) + collected + bonus; persist(); }
+  if (win && !b.demo) {
+    const got = await befriendFlow(b, stars);
+    if (b !== B) return;
+    if (got) unlocked.push(got);
+  }
+  showResults({ win, stars, goals, mvp, unlocked, firstClear, collected, bonus });
+}
+
+/* ---------- befriend (capture) a wild pet after a win ---------- */
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+function befriendFlow(b, stars){
+  const keys = [...new Set(b.stage.enemies)];
+  if (keys.every(k => save.caught.includes(k))) return Promise.resolve(null);
+  return new Promise(res => {
+    const ov = $('#catch');
+    $('#catch-pick').hidden = false; $('#catch-stage').hidden = true; ov.hidden = false;
+    $('#catch-stars').textContent = stars ? `Your ${stars} ⭐ add +${stars*5}% to every chance.` : '';
+    $('#catch-list').innerHTML = keys.map(k => {
+      const e = ENEMIES[k], own = save.caught.includes(k), c = Math.round(catchChance(k, stars)*100);
+      return `<button class="item${own?' empty':''}" data-k="${k}" ${own?'disabled':''}>
+        <span class="ii">${e.emoji}</span>
+        <span class="it"><span class="in">${e.name} ${TYPES[e.type].icon}</span><br><span class="id">${own ? 'Already on your team ✓' : `${e.boss?'👑 Boss · ':''}Strength: ${strengthLabel(k)}`}</span></span>
+        <span class="ic">${own ? '' : c+'%'}</span></button>`;
+    }).join('');
+    $$('#catch-list .item:not([disabled])').forEach(btn => btn.addEventListener('click', () => attempt(btn.dataset.k)));
+    $('#catch-skip').onclick = () => { ov.hidden = true; res(null); };
+
+    async function attempt(k){
+      Snd.play('tap');
+      const e = ENEMIES[k], chance = catchChance(k, stars), ok = Math.random() < chance;
+      $('#catch-pick').hidden = true; $('#catch-stage').hidden = false;
+      const pet = $('#c-pet'), snack = $('#c-snack'), msg = $('#c-msg'), cont = $('#c-continue');
+      pet.textContent = e.emoji; pet.style.opacity = 1; cont.hidden = true; snack.hidden = false;
+      msg.innerHTML = `Tossing a Friendship Snack to <b>${e.name}</b>…<br><small>${Math.round(chance*100)}% chance</small>`;
+      await sleepMs(300);
+      await snack.animate([{transform:'translate(-50%,0) rotate(0) scale(1)'},{transform:'translate(-50%,-170px) rotate(300deg) scale(1.1)',offset:.6},{transform:'translate(-50%,-105px) rotate(540deg) scale(.5)'}], { duration:850, easing:'ease-out', fill:'forwards' }).finished;
+      snack.hidden = true; Snd.play('coin');
+      await pet.animate([{transform:'scale(1)'},{transform:'scale(1.15,.9)'},{transform:'scale(.95,1.08)'},{transform:'scale(1)'}], { duration:420 }).finished;
+      // the tense part: each wobble is the pet deciding
+      const wobbles = ok ? 3 : 1 + Math.floor(Math.random()*3);
+      for (let i=0;i<wobbles;i++){
+        msg.innerHTML = `<b>${e.name}</b> is thinking${'.'.repeat(i+1)}`;
+        Snd.play('tap');
+        await pet.animate([{transform:'rotate(0)'},{transform:'rotate(-16deg)'},{transform:'rotate(16deg)'},{transform:'rotate(0)'}], { duration:480 }).finished;
+        await sleepMs(380);
+      }
+      if (ok) {
+        save.caught.push(k); persist();
+        Snd.play('win'); confetti(); burst({ spr:pet }, ['💖','💕','✨','🌟'], 16, true);
+        pet.animate([{transform:'none'},{transform:'translateY(-30px) scale(1.15)'},{transform:'none'}], { duration:450, iterations:2 });
+        msg.innerHTML = `🎉 <b>${e.name}</b> became your friend!<br><small>It can now join your team${e.boss?'':` and learned <b>${e.petUlt.name}</b>`}.</small>`;
+      } else {
+        Snd.play('lose');
+        await pet.animate([{transform:'none'},{transform:'translateX(-12px)'},{transform:'translateX(12px)'},{transform:'none'}], { duration:300 }).finished;
+        pet.animate([{transform:'none',opacity:1},{transform:'translateX(220px) rotate(20deg)',opacity:0}], { duration:600, easing:'ease-in', fill:'forwards' });
+        burst({ spr:pet }, ['💨'], 6);
+        msg.innerHTML = `💨 <b>${e.name}</b> ran away…<br><small>Win this stage again to try once more.</small>`;
+      }
+      cont.hidden = false;
+      cont.onclick = () => { ov.hidden = true; pet.getAnimations().forEach(a => a.cancel()); res(ok ? k : null); };
+    }
+  });
+}
+
+function showResults(r){
+  const b = B;
+  $('#res-title').textContent = r.win ? 'Victory!' : 'So close!';
+  $('#res-title').classList.toggle('lose', !r.win);
+  $('#res-stage').textContent = `Stage ${b.idx+1} · ${b.stage.name}${b.demo?' · Demo':''}`;
+  $('#res-stars').innerHTML = [0,1,2].map(i => `<span class="${i<r.stars?'on':''}" style="animation-delay:${.3+i*.25}s">★</span>`).join('');
+  $('#res-goals').innerHTML = r.goals.map(g => `<li class="${g.ok?'ok':''}"><i>${g.ok?'✓':'–'}</i>${g.t}</li>`).join('');
+  const total = b.players.reduce((a,u) => a+u.dmgDealt, 0);
+  $('#res-treats').innerHTML = `<span class="jar" id="res-jar">🫙</span><span style="flex:1">Treats earned<small>${r.collected} collected${r.bonus?` + ${r.bonus} bonus`:''}${b.demo?'':` · bank 🍪 ${save.treats}`}</small></span><b id="res-tcount">0</b>`;
+  setTimeout(() => treatRain(r.collected + r.bonus), 1100);
+  $('#res-stats').innerHTML = [['Rounds', b.round], ['Damage', total], ['Best hit', b.stats.maxHit], ['Breaks', b.stats.breaks]]
+    .map(([k,v]) => `<div class="stat"><small>${k}</small><b>${v}</b></div>`).join('');
+  $('#res-mvp').innerHTML = `<span class="me">${r.mvp.emoji}</span><span>MVP: ${r.mvp.name}<br><small style="color:var(--muted)">${r.mvp.dmgDealt} damage dealt</small></span>`;
+  const un = $('#res-unlock');
+  const champion = r.win && !b.demo && b.idx===STAGES.length-1;
+  un.hidden = !(r.unlocked.length || champion);
+  un.innerHTML = r.unlocked.map(k => `🎉 ${petDef(k).emoji} ${petDef(k).name} joined your team!`).join('<br>') + (champion ? `${r.unlocked.length?'<br>':''}🏆 You are the Pawsome Champion!` : '');
+  const hasNext = r.win && b.idx < STAGES.length-1;
+  $('#res-next').hidden = !hasNext;
+  if (r.win) setTimeout(() => Snd.play('start'), 300);
+  showScreen('result');
+}
+$('#res-next').addEventListener('click', () => { const i = B.idx+1; showScreen('map'); setTimeout(() => openTeam(i), 350); });
+$('#res-retry').addEventListener('click', () => { const i = B.idx, t = B.players.map(u => u.key); startBattle(i, t); });
+$('#res-map').addEventListener('click', () => { B = null; showScreen('map'); });
+
+/* ---------- pause / speed ---------- */
+$('#b-pause').addEventListener('click', () => { setPaused(true); $('#pause').hidden = false; syncSoundButtons(); });
+$('#p-resume').addEventListener('click', () => { $('#pause').hidden = true; setPaused(false); });
+$('#p-manual').addEventListener('click', () => openManual('battle'));
+$('#p-quit').addEventListener('click', () => { if (B) B.aborted = true; B = null; $('#pause').hidden = true; setPaused(false); showScreen('map'); });
+$('#b-speed').addEventListener('click', e => { SPEED = SPEED===1 ? .55 : 1; e.currentTarget.textContent = SPEED===1 ? '1×' : '2×'; toast(SPEED===1 ? 'Normal speed' : 'Fast speed'); });
+
+/* =========================================================
+   VISUAL EFFECTS
+   ========================================================= */
+function ptOf(el){ const r = el.getBoundingClientRect(), g = GAME.getBoundingClientRect(); return { x:r.left-g.left+r.width/2, y:r.top-g.top+r.height/2 }; }
+function lunge(u, t){
+  if (!t) return wait(100);
+  const a = ptOf(u.spr), b = ptOf(t.spr), dx = (b.x-a.x)*.22, dy = (b.y-a.y)*.22;
+  u.spr.animate([{transform:'none'},{transform:`translate(${-dx*.25}px,${-dy*.25}px) scale(1.05)`,offset:.35},{transform:`translate(${dx}px,${dy}px) scale(1.15)`,offset:.7},{transform:'none'}], { duration:430*SPEED, easing:'ease-out' });
+  return wait(240);
+}
+function projectile(u, t, icon, size=36, soft){
+  const a = ptOf(u.spr), b = ptOf(t.spr);
+  const p = document.createElement('div'); p.className = 'proj'; p.textContent = icon; p.style.fontSize = size+'px'; FX.append(p);
+  const mx = (a.x+b.x)/2 + (soft?0:rand(-30,30)), my = Math.min(a.y,b.y) - 50;
+  const tf = (x,y,s,r) => `translate(${x}px,${y}px) translate(-50%,-50%) scale(${s}) rotate(${r}deg)`;
+  const anim = p.animate([{transform:tf(a.x,a.y,.5,0)},{transform:tf(mx,my,1.25,200)},{transform:tf(b.x,b.y,1,380)}], { duration:(soft?520:380)*SPEED, easing:'ease-in' });
+  // sparkle trail
+  for (let i=1;i<4;i++) setTimeout(() => { const q = ptOf(p); if (q.x) spark(q.x, q.y, '✨'); }, i*90*SPEED);
+  return new Promise(r => { anim.onfinish = () => { p.remove(); r(); }; });
+}
+function spark(x, y, icon){
+  const s = document.createElement('div'); s.className = 'part'; s.textContent = icon; s.style.fontSize = '14px'; FX.append(s);
+  s.animate([{transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(1)`,opacity:1},{transform:`translate(${x}px,${y+14}px) translate(-50%,-50%) scale(.2)`,opacity:0}], { duration:400 }).onfinish = () => s.remove();
+}
+function burst(t, icons, n=8, rise){
+  const c = ptOf(t.spr);
+  for (let i=0;i<n;i++){
+    const s = document.createElement('div'); s.className = 'part'; s.textContent = pick(icons); s.style.fontSize = rand(14,26)+'px'; FX.append(s);
+    const ang = rand(0,Math.PI*2), d = rand(30,75);
+    const ex = rise ? c.x + rand(-40,40) : c.x + Math.cos(ang)*d, ey = rise ? c.y - rand(40,90) : c.y + Math.sin(ang)*d;
+    s.animate([{transform:`translate(${c.x}px,${c.y}px) translate(-50%,-50%) scale(.4)`,opacity:1},{transform:`translate(${ex}px,${ey}px) translate(-50%,-50%) scale(1.1) rotate(${rand(-90,90)}deg)`,opacity:0}],
+      { duration:rand(550,850), easing:'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => s.remove();
+  }
+}
+function floatText(t, txt, cls='', dy=0){
+  const c = ptOf(t.spr);
+  const s = document.createElement('div'); s.className = 'fnum '+cls; s.textContent = txt; FX.append(s);
+  const x = Math.max(60, Math.min(GAME.clientWidth-60, c.x + rand(-8,8))), y = c.y - 20 + dy;
+  s.animate([{transform:`translate(${x}px,${y}px) translate(-50%,-50%) scale(.4)`,opacity:0},{transform:`translate(${x}px,${y-18}px) translate(-50%,-50%) scale(1.15)`,opacity:1,offset:.18},{transform:`translate(${x}px,${y-30}px) translate(-50%,-50%) scale(1)`,opacity:1,offset:.75},{transform:`translate(${x}px,${y-50}px) translate(-50%,-50%) scale(.9)`,opacity:0}],
+    { duration:1300, easing:'ease-out' }).onfinish = () => s.remove();
+}
+function shakeEl(el){ el.animate([{transform:'none'},{transform:'translateX(-9px)'},{transform:'translateX(8px)'},{transform:'translateX(-5px)'},{transform:'translateX(3px)'},{transform:'none'}], { duration:380 }); }
+function flashUnit(t){ t.spr.querySelector('.u-emoji').animate([{filter:'brightness(3) drop-shadow(0 0 10px #fff)'},{filter:'none'}], { duration:300 }); }
+function screenShake(px=8){ if (REDUCED) return; GAME.animate([{transform:'none'},{transform:`translate(${px}px,${-px/2}px)`},{transform:`translate(${-px}px,${px/2}px)`},{transform:`translate(${px/2}px,0)`},{transform:'none'}], { duration:320 }); }
+function flash(color='#fff', o=.8){ const f = $('#flash'); f.style.background = color; f.animate([{opacity:o},{opacity:0}], { duration:450 }); }
+function hop(u, times=1){ u.spr.animate([{transform:'none'},{transform:'translateY(-22px) scale(1.08)'},{transform:'none'}], { duration:420, iterations:times, easing:'ease-out' }); }
+function dodge(t){ t.spr.animate([{transform:'none'},{transform:'translateX(30px) rotate(10deg)'},{transform:'none'}], { duration:400 }); }
+async function showBanner(html, ms){
+  const b = $('#banner'); b.innerHTML = html; b.hidden = false;
+  b.animate([{transform:'scale(.2)',opacity:0},{transform:'scale(1.15)',opacity:1,offset:.25},{transform:'scale(1)',opacity:1,offset:.4},{transform:'scale(1)',opacity:1,offset:.85},{transform:'scale(1.4)',opacity:0}], { duration:ms });
+  await wait(ms/SPEED); b.hidden = true;
+}
+async function ultCutscene(u, m){
+  const o = $('#ult'), c = TYPES[m.type].color;
+  o.querySelector('.ult-band').style.setProperty('--c1', c);
+  o.querySelector('.ult-band').style.setProperty('--c2', '#fff3c4');
+  o.querySelector('.ult-pet').textContent = u.emoji;
+  o.querySelector('.ult-text b').textContent = m.name;
+  o.hidden = false;
+  [...o.querySelectorAll('.ult-band,.ult-pet')].forEach(el => { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; });
+  Snd.play('ult');
+  await wait(1250/SPEED);
+  o.hidden = true; flash(c, .7); screenShake(10);
+  if (B.demo && !B.flags.ultSaid) { B.flags.ultSaid = 1; }
+}
+function confetti(){
+  const cols = ['#ff4f8b','#ffc531','#3ccf9a','#7a5cff','#2f9bff','#fff'];
+  for (let i=0;i<70;i++){
+    const s = document.createElement('div'); s.className = 'part';
+    s.style.width = rand(6,11)+'px'; s.style.height = rand(10,16)+'px'; s.style.background = pick(cols); s.style.border = '1.5px solid #2a1f4a'; s.style.borderRadius = '2px';
+    FX.append(s);
+    const x = rand(0, GAME.clientWidth), x2 = x + rand(-80,80);
+    s.animate([{transform:`translate(${x}px,-20px) rotate(0)`},{transform:`translate(${x2}px,${GAME.clientHeight+20}px) rotate(${rand(360,900)}deg)`}], { duration:rand(1600,3000), delay:rand(0,600), easing:'cubic-bezier(.3,.1,.7,1)', fill:'backwards' }).onfinish = () => s.remove();
+  }
+}
+
+/* ---------- attack styles ---------- */
+function deliver(anim, u, t, m){
+  const col = TYPES[m.type].color, ic = TYPES[m.type].icon;
+  switch (anim) {
+    case 'none':   return Promise.resolve();
+    case 'beam':   return beam(u, t, col);
+    case 'zap':    return zap(t, col);
+    case 'rain':   return rain(t, ic);
+    case 'wave':   return wait(waveDelay(t));
+    case 'volley': return Promise.all([0,1,2].map(i => new Promise(r => setTimeout(r, i*110*SPEED)).then(() => projectile(u, t, ic, 24))));
+    default:       return projectile(u, t, ic, m.slot==='ult' ? 50 : 36);
+  }
+}
+function beam(u, t, col){
+  const a = ptOf(u.spr), b = ptOf(t.spr), len = Math.hypot(b.x-a.x, b.y-a.y), ang = Math.atan2(b.y-a.y, b.x-a.x);
+  const el = document.createElement('div'); el.className = 'beam'; el.style.width = len+'px';
+  el.style.background = `linear-gradient(90deg,rgba(255,255,255,.3),#fff 35%,${col})`; el.style.boxShadow = `0 0 14px 4px ${col}`;
+  FX.append(el);
+  const tf = (sx,sy) => `translate(${a.x}px,${a.y}px) rotate(${ang}rad) scale(${sx},${sy})`;
+  el.animate([{transform:tf(0,1)},{transform:tf(1,1.4),offset:.35},{transform:tf(1,.15),opacity:.2}], { duration:520*SPEED, easing:'ease-out' }).onfinish = () => el.remove();
+  return wait(190);
+}
+function zap(t, col){
+  const c = ptOf(t.spr), top = Math.max(-10, c.y-240), pts = [];
+  for (let i=0;i<=7;i++){ const y = top + (c.y-top)*i/7, x = i===7 ? c.x : c.x + rand(-26,26); pts.push(x.toFixed(1)+','+y.toFixed(1)); }
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('class','zap');
+  svg.innerHTML = `<polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="11" stroke-linejoin="round" opacity=".75"/><polyline points="${pts.join(' ')}" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>`;
+  FX.append(svg);
+  svg.animate([{opacity:0},{opacity:1,offset:.1},{opacity:.15,offset:.3},{opacity:1,offset:.45},{opacity:0}], { duration:460*SPEED }).onfinish = () => svg.remove();
+  flash('#fffbe0', .35);
+  return wait(110);
+}
+function rain(t, ic){
+  const c = ptOf(t.spr);
+  for (let i=0;i<5;i++){
+    const s = document.createElement('div'); s.className = 'part'; s.textContent = ic; s.style.fontSize = rand(22,34)+'px'; FX.append(s);
+    const x = c.x + rand(-30,30);
+    s.animate([{transform:`translate(${x+40}px,${c.y-240}px) translate(-50%,-50%) rotate(25deg)`,opacity:0},{transform:`translate(${x+32}px,${c.y-200}px) translate(-50%,-50%)`,opacity:1,offset:.15},{transform:`translate(${x}px,${c.y}px) translate(-50%,-50%) scale(1.35)`,opacity:1}],
+      { duration:420*SPEED, delay:i*70*SPEED, easing:'ease-in', fill:'backwards' }).onfinish = () => s.remove();
+  }
+  return wait(640);
+}
+function sweepWave(targets, m){
+  const y = ptOf(targets[0].spr).y, W = GAME.clientWidth;
+  const el = document.createElement('div'); el.className = 'part'; el.style.fontSize = '46px'; el.style.whiteSpace = 'nowrap';
+  el.textContent = TYPES[m.type].icon.repeat(4); el.style.filter = `drop-shadow(0 0 10px ${TYPES[m.type].color})`; FX.append(el);
+  el.animate([{transform:`translate(-260px,${y}px) translateY(-50%) skewX(-10deg)`},{transform:`translate(${W+20}px,${y}px) translateY(-50%) skewX(-10deg)`}], { duration:800*SPEED, easing:'linear' }).onfinish = () => el.remove();
+}
+function waveDelay(t){ const W = GAME.clientWidth; return 800 * Math.max(0, (ptOf(t.spr).x + 60) / (W + 280)); }
+function bodyMove(u, t, kind){
+  const a = ptOf(u.spr), b = ptOf(t.spr), dx = (b.x-a.x)*.8, dy = (b.y-a.y)*.8;
+  const frames = kind==='pounce'
+    ? [{transform:'none'},{transform:`translate(${dx*.5}px,${dy*.5-90}px) scale(1.2) rotate(-15deg)`,offset:.4},{transform:`translate(${dx}px,${dy}px) scale(1.3,.75)`,offset:.55},{transform:`translate(${dx}px,${dy}px)`,offset:.68},{transform:'none'}]
+    : [{transform:'none'},{transform:`translate(${-dx*.08}px,${-dy*.08}px) scale(.9)`,offset:.2},{transform:`translate(${dx}px,${dy}px) scale(1.2)`,offset:.5},{transform:`translate(${dx}px,${dy}px)`,offset:.62},{transform:'none'}];
+  u.spr.style.zIndex = 6;
+  u.spr.animate(frames, { duration:640*SPEED, easing:'ease-in-out' }).onfinish = () => u.spr.style.zIndex = '';
+  if (kind==='dash') for (let i=1;i<=4;i++) setTimeout(() => ghost(u), (130+i*45)*SPEED);
+  return wait(kind==='pounce' ? 350 : 320);
+}
+function ghost(u){
+  const r = u.spr.getBoundingClientRect(), g = GAME.getBoundingClientRect();
+  const s = document.createElement('div'); s.className = 'part'; s.textContent = u.emoji;
+  s.style.fontSize = getComputedStyle(u.spr).fontSize; s.style.lineHeight = '1.05'; s.style.filter = `drop-shadow(0 0 6px ${TYPES[u.type].color})`;
+  FX.append(s);
+  const tf = `translate(${r.left-g.left}px,${r.top-g.top}px)`;
+  s.animate([{transform:tf,opacity:.45},{transform:tf,opacity:0}], { duration:280 }).onfinish = () => s.remove();
+}
+function impactRing(t, col, big){
+  const c = ptOf(t.spr);
+  const r = document.createElement('div'); r.className = 'ring'; r.style.borderColor = col; r.style.boxShadow = `0 0 16px ${col}, inset 0 0 12px #fff`; FX.append(r);
+  r.animate([{transform:`translate(${c.x}px,${c.y}px) scale(.2)`,opacity:1},{transform:`translate(${c.x}px,${c.y}px) scale(${big?2.3:1.5})`,opacity:0}], { duration:430, easing:'ease-out' }).onfinish = () => r.remove();
+  const s = document.createElement('div'); s.className = 'part'; s.textContent = '✦'; s.style.color = '#fff'; s.style.fontSize = (big?96:62)+'px'; s.style.textShadow = `0 0 18px ${col}`; FX.append(s);
+  s.animate([{transform:`translate(${c.x}px,${c.y}px) translate(-50%,-50%) scale(.2)`,opacity:1},{transform:`translate(${c.x}px,${c.y}px) translate(-50%,-50%) scale(1.15) rotate(45deg)`,opacity:0}], { duration:300 }).onfinish = () => s.remove();
+}
+function shards(t){
+  const c = ptOf(t.spr);
+  for (let i=0;i<14;i++){
+    const s = document.createElement('div'); s.className = 'shard'; FX.append(s);
+    const ang = rand(0, Math.PI*2), d = rand(50,120);
+    s.animate([{transform:`translate(${c.x}px,${c.y}px) rotate(0) scale(1)`,opacity:1},{transform:`translate(${c.x+Math.cos(ang)*d}px,${c.y+Math.sin(ang)*d+30}px) rotate(${rand(-400,400)}deg) scale(.4)`,opacity:0}],
+      { duration:rand(600,900), easing:'cubic-bezier(.2,.8,.4,1)' }).onfinish = () => s.remove();
+  }
+}
+/* ---------- treat collection ---------- */
+function dropTreats(t, n){
+  const b = B; b.treats += n;
+  const chip = $('#b-treats'), c = ptOf(t.spr), d = ptOf(chip), k = Math.min(n, 8);
+  for (let i=0;i<k;i++){
+    const s = document.createElement('div'); s.className = 'part'; s.textContent = '🍪'; s.style.fontSize = '22px'; FX.append(s);
+    const ox = c.x + rand(-55,55), oy = c.y + rand(-70,-25);
+    s.animate([
+      {transform:`translate(${c.x}px,${c.y}px) translate(-50%,-50%) scale(.3)`},
+      {transform:`translate(${ox}px,${oy}px) translate(-50%,-50%) scale(1.25)`, offset:.35},
+      {transform:`translate(${ox}px,${oy+8}px) translate(-50%,-50%) scale(1)`, offset:.5},
+      {transform:`translate(${d.x}px,${d.y}px) translate(-50%,-50%) scale(.5)`}],
+      { duration:1100+i*80, easing:'cubic-bezier(.5,0,.7,1)' }).onfinish = () => {
+        s.remove(); chip.textContent = '🍪 '+b.treats;
+        chip.classList.remove('bump'); void chip.offsetWidth; chip.classList.add('bump'); Snd.play('coin');
+      };
+  }
+}
+function treatRain(total){
+  const jar = $('#res-jar'), num = $('#res-tcount'); if (!jar || !num) return;
+  const d = ptOf(jar), k = Math.min(14, Math.max(4, Math.ceil(total/4)));
+  for (let i=0;i<k;i++){
+    const s = document.createElement('div'); s.className = 'part'; s.textContent = '🍪'; s.style.fontSize = '24px'; FX.append(s);
+    const sx = rand(40, GAME.clientWidth-40);
+    s.animate([{transform:`translate(${sx}px,-30px) translate(-50%,-50%) rotate(0)`},{transform:`translate(${d.x}px,${d.y}px) translate(-50%,-50%) rotate(${rand(-360,360)}deg) scale(.6)`}],
+      { duration:700, delay:i*90, easing:'cubic-bezier(.5,0,.8,1)', fill:'backwards' }).onfinish = () => {
+        s.remove(); jar.classList.remove('bump'); void jar.offsetWidth; jar.classList.add('bump'); Snd.play('coin');
+      };
+  }
+  const t0 = performance.now(), dur = 700 + k*90;
+  (function tick(now){ const p = Math.min(1, (now-t0)/dur); num.textContent = '+' + Math.round(total*p); if (p<1) requestAnimationFrame(tick); else num.classList.add('bump'); })(t0);
+}
+
+/* =========================================================
+   MANUAL
+   ========================================================= */
+const TABS = ['Basics','Battle','Types','Items','Pet Dex'];
+let manTab = 'Basics';
+function openManual(from){ manualReturn = from; renderManual(); showScreen('manual'); }
+$('#man-back').addEventListener('click', () => { if (manualReturn==='battle' && B) { $$('.screen').forEach(s => s.classList.toggle('active', s.id==='battle')); curScreen = 'battle'; } else showScreen('title'); });
+function renderManual(){
+  $('#man-tabs').innerHTML = TABS.map(t => `<button class="tab${t===manTab?' on':''}">${t}</button>`).join('');
+  $$('#man-tabs .tab').forEach(b => b.addEventListener('click', () => { manTab = b.textContent; renderManual(); }));
+  $('#man-body').innerHTML = MANUAL[manTab]();
+  $('#man-body').scrollTop = 0;
+}
+const typeTag = t => `<span class="type-pill" style="background:${TYPES[t].color}">${TYPES[t].icon} ${TYPES[t].name}</span>`;
+const MANUAL = {
+  'Basics': () => `
+    <div class="box"><h4 style="margin-top:0">🎯 Your goal</h4><p>Knock out every wild pet on the other side. If all of your pets faint, you lose, but you can retry right away.</p></div>
+    <h4>How a stage works</h4>
+    <ol>
+      <li>Tap <b>Start Adventure</b> and pick a stage on the map.</li>
+      <li>Choose up to <b>3 pets</b> for your team. Read the tip: it tells you which types are strong here.</li>
+      <li>Pets take turns in order of <b>Speed 💨</b>. The bar at the top shows who moves next.</li>
+      <li>When it's your pet's turn, pick a <b>move</b> or open the <b>Bag</b>, then tap a target.</li>
+      <li>Win to earn up to <b>3 stars ⭐</b> and unlock the next stage and new pets.</li>
+    </ol>
+    <h4>Reading the screen</h4>
+    <dl class="kv">
+      <dt>⬆️</dt><dd><b>Wild pets</b> stand at the top.</dd>
+      <dt>⬇️</dt><dd><b>Your team</b> stands at the bottom. The glowing pet with ▼ is acting now.</dd>
+      <dt>💚</dt><dd><b>HP bar</b>: green is healthy, yellow is hurt, red is in danger. 0 HP means fainted.</dd>
+      <dt>🟨</dt><dd><b>Energy bar</b> under HP fills up as you fight. Full = Ultimate ready!</dd>
+      <dt>💭</dt><dd><b>Plan bubble</b> over each wild pet shows its next move.</dd>
+      <dt>🛡️</dt><dd><b>Guard bar</b> (white) under a wild pet's HP, with its weak types beside it.</dd>
+      <dt>🍪</dt><dd><b>Treats</b> you collected this battle (top bar).</dd>
+      <dt>🐾</dt><dd><b>Paw Points</b> (top right of the panel) are shared by your whole team.</dd>
+      <dt>❚❚</dt><dd><b>Pause</b> any time. <b>1× / 2×</b> changes battle speed.</dd>
+    </dl>`,
+  'Battle': () => `
+    <h4>Three kinds of moves</h4>
+    <dl class="kv">
+      <dt>👊</dt><dd><b>Basic</b>: always free. Each one <b>earns 1 🐾</b> for the team.</dd>
+      <dt>✨</dt><dd><b>Skill</b>: stronger or special (heals, shields, power-ups). <b>Costs 1 🐾</b>.</dd>
+      <dt>🌟</dt><dd><b>Ultimate</b>: a huge move with a cut-scene. Needs a <b>full energy bar</b>.</dd>
+    </dl>
+    <div class="box"><p style="margin:0"><b>The big idea:</b> you start with 3 🐾 and can hold up to 5. Spend them on Skills when it matters, and use Basics to earn them back.</p></div>
+    <h4>Filling the energy bar</h4>
+    <p>Basic +22 · Skill +30 · getting hit +10 · knocking out a foe +10.</p>
+    <h4>Status effects</h4>
+    <dl class="kv">${Object.values(STATUS).map(s => `<dt>${s.icon}</dt><dd><b>${s.name}</b>: ${s.desc}</dd>`).join('')}<dt>🛡️</dt><dd><b>Shield</b>: soaks up damage before HP does.</dd></dl>
+    <p>The small number next to an icon is how many turns it lasts.</p>
+    <h4>Lucky hits</h4>
+    <p>Every attack has a 12% chance to be a <b>CRITICAL</b> hit for 1.6× damage. Some pets can <b>dodge</b>.</p>
+    <h4>🛡️ Guard &amp; Break</h4>
+    <p>Every wild pet has a white <b>Guard</b> bar and shows its weak types next to 🛡️. Weak-type hits crack the Guard fast (Basic 20 · Skill 30 · Ultimate 40); other hits only chip it a little.</p>
+    <div class="box"><p style="margin:0">When the Guard hits 0: <b>BREAK!</b> The foe instantly loses 8% HP, <b>skips its next turn</b>, and takes <b>+25% damage</b> until it recovers.</p></div>
+    <h4>💭 Reading enemy plans</h4>
+    <dl class="kv">
+      <dt>⚔️</dt><dd>Will attack one of your pets.</dd>
+      <dt>🌀</dt><dd>Will hit your <b>whole team</b>: shield or heal first!</dd>
+      <dt>💚</dt><dd>Will heal: knock it out first or burst it down.</dd>
+      <dt>🔋</dt><dd>Boss energy is full. Next turn it starts charging.</dd>
+      <dt>⚠️</dt><dd><b>Ultimate incoming!</b> Break its Guard now to <b>cancel</b> the attack.</dd>
+    </dl>
+    <h4>🔗 Element combos</h4>
+    <dl class="kv">
+      <dt>💨</dt><dd><b>Steam</b>: 💧 Water hits a 🔥 Burned foe → 1.5× damage (puts out the burn).</dd>
+      <dt>⚡</dt><dd><b>Overload</b>: ⚡ Spark hits a 🐌 Slowed foe → 1.4× damage + Paralyze.</dd>
+      <dt>🌸</dt><dd><b>Bloom</b>: 🍃 Leaf hits a ⚡ Paralyzed foe → 1.25× damage + your team heals 8%.</dd>
+    </dl>
+    <p>Combo teams to try: Emberpup → Bubblecat · Bubblecat → Zippy · Zippy → Leafbun.</p>
+    <h4>🍪 Treats &amp; Training</h4>
+    <p>Wild pets drop 6 treats (bosses 30). Each star adds 5 more, and a first clear adds 15. Spend them in <b>🏋️ Pet Training</b> on the map: each rank gives +8% HP, ATK and DEF.</p>
+    <h4>💖 Befriending wild pets</h4>
+    <p>After every win, you get <b>one try</b> to befriend a wild pet from that stage. Toss it a Friendship Snack 🍙 and watch it think…</p>
+    <dl class="kv">
+      <dt>🐣</dt><dd><b>Weak</b> pets: about 80–90% chance.</dd>
+      <dt>🐾</dt><dd><b>Medium / Strong</b> pets: about 60–75%.</dd>
+      <dt>👑</dt><dd><b>Bosses</b>: 35%.</dd>
+      <dt>⭐</dt><dd>Each star you earned in that battle adds <b>+5%</b>.</dd>
+    </dl>
+    <p>If it runs away, just win the stage again. New friends show up in team select and Pet Training.</p>
+    <h4>Earning stars ⭐</h4>
+    <p>⭐ Win the battle · ⭐ No pet fainted · ⭐ Win within the round limit. Retry stages to get all 3!</p>`,
+  'Types': () => {
+    const T = Object.keys(TYPES);
+    return `<p>Every pet and every move has a type. Matching the right type is the fastest way to win.</p>
+    <div class="box"><dl class="kv" style="margin:0">
+      <dt>🔥</dt><dd><b>Fire</b> burns Leaf, but Water puts it out.</dd>
+      <dt>💧</dt><dd><b>Water</b> splashes Fire, but Leaf drinks it up.</dd>
+      <dt>🍃</dt><dd><b>Leaf</b> soaks up Water, but Fire burns it.</dd>
+      <dt>⚡</dt><dd><b>Spark</b> zaps Water, but Leaf is grounded against it.</dd>
+    </dl></div>
+    <h4>Damage chart</h4>
+    <p style="font-size:13px">Row = the move's type. Column = the target's type.</p>
+    <div class="matrix-wrap"><table class="matrix"><tr><th>Move ↓ / Target →</th>${T.map(t=>`<th>${TYPES[t].icon}</th>`).join('')}</tr>
+    ${T.map(a => `<tr><th>${TYPES[a].icon} ${TYPES[a].name}</th>${T.map(d => { const e = eff(a,d); return `<td class="${e>1?'up':e<1?'down':''}">${e>1?'1.5×':e<1?'0.6×':'1×'}</td>`; }).join('')}</tr>`).join('')}</table></div>
+    <p style="margin-top:8px">🟩 <b>Super effective</b> = 1.5× damage. 🟥 <b>Not very effective</b> = 0.6× damage.</p>`;
+  },
+  'Items': () => `<p>Open the <b>🎒 Bag</b> on your pet's turn. Using an item takes that pet's turn. Your bag refills at the start of every stage.</p>
+    <dl class="kv">${ITEMS.map(i => `<dt>${i.icon}</dt><dd><b>${i.name}</b> ×${i.count}<br>${i.desc}</dd>`).join('')}</dl>
+    <div class="box" style="margin-top:12px"><p style="margin:0">💡 Save the <b>Phoenix Feather</b> for your healer, and ring the <b>Power Bell</b> right before an Ultimate.</p></div>`,
+  'Pet Dex': () => {
+    const card = (p, locked, extra) => `<div class="box dex"><span class="de">${p.emoji}</span><div style="min-width:0"><div class="dn">${locked?'??? ':''}${p.name} ${typeTag(p.type)}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--muted)">${extra} · ❤️${p.hp} ⚔️${p.atk} 🛡️${p.def} 💨${p.spd}</div>
+      <div style="font-size:13.5px"><b>Ability · ${p.ability.name}:</b> ${p.ability.desc}</div>
+      <ul>${p.moves.map(m => `<li><b>${m.name}</b> <small>(${m.slot})</small> ${TYPES[m.type].icon}: ${m.desc}</li>`).join('')}</ul></div></div>`;
+    return `<h4 style="margin-top:4px">Your pets</h4>${Object.entries(PETS).map(([k,p]) => card(p, false, petOpen(k) ? p.role : `${p.role} · joins after Stage ${p.unlock+1}`)).join('')}
+      <h4>Wild pets</h4><p>💖 Every wild pet can be befriended after you win its stage. Once it joins you, it also learns a brand-new Ultimate.</p>${Object.entries(ENEMIES).map(([k,e]) => card(save.caught.includes(k) ? caughtDef(k) : e, false, (e.boss ? '👑 Boss' : 'Wild') + (save.caught.includes(k) ? ' · ✓ Your friend' : ` · 💖 Befriend chance ${Math.round(catchChance(k)*100)}%+`))).join('')}`;
+  },
+};
+
+/* =========================================================
+   DEMO — the game plays itself, with a pointing finger and captions
+   ========================================================= */
+async function narrate(text, ms, pos='mid'){
+  const c = $('#demo-cap'); c.className = pos==='mid' ? '' : pos; c.innerHTML = `<div>${text}</div>`; c.hidden = false;
+  try { await dsleep(ms); } finally { c.hidden = true; }
+}
+async function demoTap(el){
+  if (!DEMO || !el) throw ABORT;
+  const h = $('#hand'), p = ptOf(el);
+  h.hidden = false; h.style.transform = `translate(${p.x}px,${p.y}px)`;
+  await dsleep(720);
+  h.classList.add('press'); Snd.play('tap');
+  await dsleep(170);
+  h.classList.remove('press');
+  el.click();
+  await dsleep(380);
+}
+async function startDemo(){
+  DEMO = true;
+  $('#demo-block').hidden = false; $('#demo-ui').hidden = false;
+  const h = $('#hand'); h.style.transform = `translate(${GAME.clientWidth/2}px,${GAME.clientHeight*.9}px)`; h.hidden = false;
+  try {
+    showScreen('title');
+    await narrate('Welcome to <b>Pawsome Clash</b>! Let\'s watch a quick battle.', 2600, 'low');
+    await demoTap($('#btn-start'));
+    await narrate('This is the Adventure Map. Each stop is a stage. Clear one to unlock the next!', 3000, 'top');
+    await demoTap($('#node-0'));
+    await narrate('Pick up to 3 pets. The tip shows which types are strong here.', 3000, 'top');
+    await demoTap($('#btn-fight'));
+    // the battle now runs on its own; demoChoose() drives our pets
+  } catch(e) { if (e!==ABORT) console.error(e); }
+}
+function stopDemo(){
+  DEMO = false;
+  $('#demo-block').hidden = true; $('#demo-ui').hidden = true; $('#hand').hidden = true; $('#demo-cap').hidden = true;
+  if (B) B.aborted = true; B = null;
+  $('#team').hidden = true; $('#bag').hidden = true; $('#pause').hidden = true; $('#banner').hidden = true; $('#ult').hidden = true;
+  setPaused(false); showScreen('title');
+}
+$('#demo-skip').addEventListener('click', stopDemo);
+
+function bestFoe(u, m){
+  const foes = alive(foesOf(u));
+  return foes.sort((a,c) => (eff(m.type,c.type)-eff(m.type,a.type)) || (a.hp-c.hp))[0];
+}
+async function demoChoose(u){
+  const n = B.demoTurn++;
+  const ms = s => u.moves.find(x => x.slot===s);
+  const basic = ms('basic'), skill = ms('skill'), ult = ms('ult');
+  await dsleep(500);
+  if (n===0) await narrate(`It's ${u.name}'s turn! Basic moves are free and earn a 🐾 Paw Point.`, 3000);
+  // 1) Ultimate when ready
+  if (u.energy>=100) {
+    if (!B.flags.ultNarr) { B.flags.ultNarr = 1; await narrate('The energy bar is full! Time for an <b>ULTIMATE</b> move!', 2600); }
+    await demoTap($('#act-ult'));
+    if (ult.target==='enemy') await demoTap(bestFoe(u, ult).el);
+    return;
+  }
+  // 2) Show off the Bag once
+  if (!B.flags.item && n>=2) {
+    B.flags.item = 1;
+    await narrate('Open the 🎒 Bag to use items like potions and power-ups. It uses this pet\'s turn.', 3000);
+    await demoTap($('#act-bag')); await dsleep(400);
+    const hurt = alive(B.players).sort((a,c) => a.hp/a.maxHp - c.hp/c.maxHp)[0];
+    if (hurt.hp/hurt.maxHp < .7) { await demoTap($('#item-juice')); await demoTap(hurt.el); }
+    else { await demoTap($('#item-bell')); await demoTap(u.el); }
+    return;
+  }
+  // 3) Heal if someone is hurt and we can
+  const hurt = alive(B.players).filter(x => x.hp/x.maxHp < .5);
+  if (skill.heal && hurt.length && B.paws>=1) { await demoTap($('#act-skill')); await demoTap(hurt[0].el); return; }
+  // 4) Use a skill when we have spare paws
+  if (B.paws>=2 && !skill.heal) {
+    if (!B.flags.skillNarr) { B.flags.skillNarr = 1; await narrate('Skills are stronger but cost 1 🐾. Spend wisely!', 2600); }
+    await demoTap($('#act-skill'));
+    if (skill.target==='enemy') await demoTap(bestFoe(u, skill).el);
+    return;
+  }
+  // 5) Basic attack on the best target
+  await demoTap($('#act-basic'));
+  await demoTap(bestFoe(u, basic).el);
+}
+// hook: after the demo battle ends, explain the results and return to the title
+const _showResults = showResults;
+showResults = function(r){
+  _showResults(r);
+  if (!DEMO) return;
+  (async () => {
+    try {
+      await dsleep(1400);
+      await narrate('The results screen shows your stars ⭐, stats and MVP pet.', 3200, 'low');
+      await narrate('That\'s the demo! Tap <b>Start Adventure</b> to play for real. Have fun! 🐾', 3200, 'low');
+      stopDemo();
+    } catch(e) {}
+  })();
+};
+
+/* ---------- boot ---------- */
+syncSoundButtons();
+renderTitle();
+setBg('title');
+</script>
+</body>
+</html>
